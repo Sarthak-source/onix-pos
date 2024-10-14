@@ -280,39 +280,29 @@ class ProductCubit extends Cubit<ProductState> {
   void addProduct() {
     emit(ProductLoading());
 
-    //final defaultQuantity = int.tryParse(defaultQuantityController.text) ?? 0;
-    final barcode = barcodeController.text;
+    final barcode = barcodeController.text.trim();
 
-    // Validate inputs
-    // if (defaultQuantity <= 0 || barcode.isEmpty) {
-    //   emit(ProductError("Invalid input!"));
-    //   return;
-    // }
+    // Check if the barcode is empty
+    if (barcode.isEmpty) {
+      emit(ProductError('Barcode cannot be empty.'));
+      return;
+    }
 
-    // // Create a new product
-    // final newProduct = ProductModel(
-    //   name: "Product from Barcode $barcode",
-    //   price: 0.0,
-    //   barcodeNumber: int.tryParse(barcode) ?? 0,
-    //   quantity: defaultQuantity.toDouble(),
-    // );
-
-    //await Future.delayed(const Duration(seconds: 2));
-
-    // Find the product by barcode
-    productList = [
-      productList.firstWhere(
-        (product) => product.barcodeNumber.toString() == barcode.trim(),
+    // Try to find the product by barcode
+    try {
+      final product = productList.firstWhere(
+        (product) => product.barcodeNumber.toString() == barcode,
         orElse: () => throw Exception('Product not found'),
-      )
-    ];
+      );
 
-    emit(ProductLoaded(productList));
+      // If found, update the productList to only include the found product
+      productList = [product];
 
-    //productList.add(newProduct);
-    key = UniqueKey();
-
-    ///emit(ProductLoaded(productList));
+      emit(ProductLoaded(productList));
+    } catch (e) {
+      // Handle the error if no product matches the barcode
+      emit(ProductError(e.toString()));
+    }
 
     // Clear the controllers
     defaultQuantityController.clear();
