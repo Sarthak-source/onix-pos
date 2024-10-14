@@ -14,3 +14,15 @@ A few resources to get you started if this is your first Flutter project:
 For help getting started with Flutter development, view the
 [online documentation](https://docs.flutter.dev/), which offers tutorials,
 samples, guidance on mobile development, and a full API reference.
+
+## Deploying
+
+flutter clean
+flutter pub get
+flutter build web --base-ref /onix-pos/ --release
+
+cd build/web
+git init
+git add .
+git commit -m "deploy 1"
+
