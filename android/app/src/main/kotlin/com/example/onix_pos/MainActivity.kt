@@ -1,0 +1,5 @@
+package com.example.onix_pos
+
+import io.flutter.embedding.android.FlutterActivity
+
+class MainActivity: FlutterActivity()
