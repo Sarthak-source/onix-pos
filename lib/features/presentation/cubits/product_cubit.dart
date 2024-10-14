@@ -73,7 +73,6 @@ class ProductCubit extends Cubit<ProductState> {
         )
       ];
 
-      key = UniqueKey();
       emit(ProductLoaded(productList));
 
       key = UniqueKey();
@@ -285,22 +284,35 @@ class ProductCubit extends Cubit<ProductState> {
     final barcode = barcodeController.text;
 
     // Validate inputs
-    if (defaultQuantity <= 0 || barcode.isEmpty) {
-      emit(ProductError("Invalid input!"));
-      return;
-    }
+    // if (defaultQuantity <= 0 || barcode.isEmpty) {
+    //   emit(ProductError("Invalid input!"));
+    //   return;
+    // }
 
-    // Create a new product
-    final newProduct = ProductModel(
-      name: "Product from Barcode $barcode",
-      price: 0.0,
-      barcodeNumber: int.tryParse(barcode) ?? 0,
-      quantity: defaultQuantity.toDouble(),
-    );
+    // // Create a new product
+    // final newProduct = ProductModel(
+    //   name: "Product from Barcode $barcode",
+    //   price: 0.0,
+    //   barcodeNumber: int.tryParse(barcode) ?? 0,
+    //   quantity: defaultQuantity.toDouble(),
+    // );
 
-    productList.add(newProduct);
-    key = UniqueKey();
+    //await Future.delayed(const Duration(seconds: 2));
+
+    // Find the product by barcode
+    productList = [
+      productList.firstWhere(
+        (product) => product.barcodeNumber.toString() == barcode.trim(),
+        orElse: () => throw Exception('Product not found'),
+      )
+    ];
+
     emit(ProductLoaded(productList));
+
+    //productList.add(newProduct);
+    key = UniqueKey();
+
+    ///emit(ProductLoaded(productList));
 
     // Clear the controllers
     defaultQuantityController.clear();

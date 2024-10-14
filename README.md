@@ -19,7 +19,7 @@ samples, guidance on mobile development, and a full API reference.
 
 flutter clean
 flutter pub get
-flutter build web --base-href /onix-pos/ --release
+flutter build web --base-href /onix-pos-deploy/ --release
 
 cd build/web
 git init
