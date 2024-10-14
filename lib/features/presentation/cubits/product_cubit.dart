@@ -280,7 +280,7 @@ class ProductCubit extends Cubit<ProductState> {
   void addProduct() {
     emit(ProductLoading());
 
-    final defaultQuantity = int.tryParse(defaultQuantityController.text) ?? 0;
+    //final defaultQuantity = int.tryParse(defaultQuantityController.text) ?? 0;
     final barcode = barcodeController.text;
 
     // Validate inputs
