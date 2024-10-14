@@ -759,9 +759,9 @@ class ProductCubit extends Cubit<ProductState> {
   Future<void> generateInvoice(BuildContext context) async {
     final pdf = pw.Document();
 
-    final pw.Font boldFont = await loadFont('assets/Cairo-Bold.ttf');
+    //final pw.Font boldFont = await loadFont('assets/Cairo-Bold.ttf');
     final pw.Font regularFont = await loadFont('assets/Cairo-Regular.ttf');
-    final pw.Font lightFont = await loadFont('assets/Cairo-Light.ttf');
+    //final pw.Font lightFont = await loadFont('assets/Cairo-Light.ttf');
 
     final pw.Widget qrCodeWidget = await _qrCodePlaceholder();
     final pw.Widget logoWidget = await _logoPlaceholder(regularFont);
