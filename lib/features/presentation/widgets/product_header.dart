@@ -1,6 +1,7 @@
 // ignore_for_file: unnecessary_const
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_barcode_listener/flutter_barcode_listener.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:onix_pos/core/common_widgets/custom_textfiled_purchase.dart';
@@ -11,8 +12,6 @@ import '../../../core/common_widgets/custom_text_icon_button.dart';
 
 class HeaderComponent extends StatelessWidget {
   const HeaderComponent({super.key});
-
-  
 
   @override
   Widget build(BuildContext context) {
@@ -73,13 +72,15 @@ class HeaderComponent extends StatelessWidget {
                       SizedBox(
                         width: defaultQuantityWidth,
                         child: CustomTextFieldPurchase(
-                          controller: productCubit
-                              .defaultQuantityController,
+                          controller: productCubit.defaultQuantityController,
                           hint: 'الكمية الإفتراضية',
                           labelText: 'الكمية الإفتراضية',
                           elevation: 0,
                           type: TextInputType.number,
                           isRequired: true,
+                          textInputFormatter: [
+                            FilteringTextInputFormatter.digitsOnly,
+                          ],
                         ),
                       ),
                       const SizedBox(width: spacerWidth),
@@ -93,8 +94,9 @@ class HeaderComponent extends StatelessWidget {
                           isRequired: true,
                           suffixIcon: BarcodeKeyboardListener(
                             onBarcodeScanned: (barcode) {
-                              productCubit.barcodeController.text= barcode;
-                            }, child:  const Icon(Icons.qr_code),
+                              productCubit.barcodeController.text = barcode;
+                            },
+                            child: const Icon(Icons.qr_code),
                           ),
                         ),
                       ),

@@ -61,121 +61,119 @@ class ProductCubit extends Cubit<ProductState> {
         quantity: 1),
   ];
 
-  
-
   void addProduct() {
-  emit(ProductLoading());
+    emit(ProductLoading());
 
-  final barcode = barcodeController.text.trim();
+    final barcode = barcodeController.text.trim();
 
-  // Check if the barcode is empty
-  if (barcode.isEmpty) {
-    emit(ProductError('Barcode cannot be empty.'));
-    return;
-  }
-
-  // Try to find the product by barcode
-  try {
-    final product = productList.firstWhere(
-      (product) => product.barcodeNumber.toString() == barcode,
-      orElse: () => throw Exception('Product not found'),
-    );
-
-    double additionalQuantity = double.tryParse(defaultQuantityController.text) ?? 0.0;
-
-    // Update the product's quantity in the main productList
-    productList = productList.map((p) {
-      if (p.barcodeNumber == product.barcodeNumber) {
-        return p.copyWith(quantity: p.quantity + additionalQuantity);
-      }
-      return p;
-    }).toList();
-
-    // Check if the product already exists in productListDisplay
-    final existingIndex = productListDisplay.indexWhere(
-      (p) => p.barcodeNumber == product.barcodeNumber,
-    );
-
-    if (existingIndex >= 0) {
-      // If product exists in productListDisplay, update its quantity
-      productListDisplay[existingIndex] = product.copyWith(
-        quantity: product.quantity + additionalQuantity,
-      );
-    } else {
-      // If product does not exist, add it to productListDisplay
-      productListDisplay.add(
-        product.copyWith(quantity: product.quantity + additionalQuantity),
-      );
-    }
-
-    emit(ProductLoaded(productListDisplay));
-    key = UniqueKey();
-  } catch (e) {
-    // Handle the error if no product matches the barcode
-    emit(ProductError(e.toString()));
-  }
-
-  // Clear the controllers
-  defaultQuantityController.clear();
-  barcodeController.clear();
-}
-
-Future<void> fetchProductByBarcode(String barcode) async {
-  emit(ProductLoading());
-
-  try {
     // Check if the barcode is empty
     if (barcode.isEmpty) {
       emit(ProductError('Barcode cannot be empty.'));
       return;
     }
 
-    // Simulate network delay or database query
-    await Future.delayed(const Duration(seconds: 2));
-
-    // Find the product by barcode
-    final product = productList.firstWhere(
-      (product) => product.barcodeNumber.toString() == barcode,
-      orElse: () => throw Exception('Product not found'),
-    );
-
-    // Update the product's quantity in the main productList
-    productList = productList.map((p) {
-      if (p.barcodeNumber == product.barcodeNumber) {
-        return p.copyWith(quantity: p.quantity + 1);
-      }
-      return p;
-    }).toList();
-
-    // Check if the product already exists in productListDisplay
-    final existingIndex = productListDisplay.indexWhere(
-      (p) => p.barcodeNumber == product.barcodeNumber,
-    );
-
-    if (existingIndex >= 0) {
-      // If product exists in productListDisplay, update its quantity
-      productListDisplay[existingIndex] = product.copyWith(
-        quantity: product.quantity + 1,
+    // Try to find the product by barcode
+    try {
+      final product = productList.firstWhere(
+        (product) => product.barcodeNumber.toString() == barcode,
+        orElse: () => throw Exception('Product not found'),
       );
-    } else {
-      // If product does not exist, add it to productListDisplay
-      productListDisplay.add(product.copyWith(quantity: product.quantity + 1));
+
+      double additionalQuantity =
+          double.tryParse(defaultQuantityController.text) ?? 0.0;
+
+      // Update the product's quantity in the main productList
+      productList = productList.map((p) {
+        if (p.barcodeNumber == product.barcodeNumber) {
+          return p.copyWith(quantity: p.quantity + additionalQuantity);
+        }
+        return p;
+      }).toList();
+
+      // Check if the product already exists in productListDisplay
+      final existingIndex = productListDisplay.indexWhere(
+        (p) => p.barcodeNumber == product.barcodeNumber,
+      );
+
+      if (existingIndex >= 0) {
+        // If product exists in productListDisplay, update its quantity
+        productListDisplay[existingIndex] = product.copyWith(
+          quantity: product.quantity + additionalQuantity,
+        );
+      } else {
+        // If product does not exist, add it to productListDisplay
+        productListDisplay.add(
+          product.copyWith(quantity: product.quantity + additionalQuantity),
+        );
+      }
+
+      emit(ProductLoaded(productListDisplay));
+      key = UniqueKey();
+    } catch (e) {
+      // Handle the error if no product matches the barcode
+      emit(ProductError(e.toString()));
     }
 
-    emit(ProductLoaded(productListDisplay));
-    key = UniqueKey();
-  } catch (e) {
-    // Handle the error state
-    emit(ProductError(e.toString()));
+    // Clear the controllers
+    defaultQuantityController.clear();
+    barcodeController.clear();
   }
-}
 
+  Future<void> fetchProductByBarcode(String barcode) async {
+    emit(ProductLoading());
+
+    try {
+      // Check if the barcode is empty
+      if (barcode.isEmpty) {
+        emit(ProductError('Barcode cannot be empty.'));
+        return;
+      }
+
+      // Simulate network delay or database query
+      await Future.delayed(const Duration(seconds: 2));
+
+      // Find the product by barcode
+      final product = productList.firstWhere(
+        (product) => product.barcodeNumber.toString() == barcode,
+        orElse: () => throw Exception('Product not found'),
+      );
+
+      // Update the product's quantity in the main productList
+      productList = productList.map((p) {
+        if (p.barcodeNumber == product.barcodeNumber) {
+          return p.copyWith(quantity: p.quantity + 1);
+        }
+        return p;
+      }).toList();
+
+      // Check if the product already exists in productListDisplay
+      final existingIndex = productListDisplay.indexWhere(
+        (p) => p.barcodeNumber == product.barcodeNumber,
+      );
+
+      if (existingIndex >= 0) {
+        // If product exists in productListDisplay, update its quantity
+        productListDisplay[existingIndex] = product.copyWith(
+          quantity: product.quantity + 1,
+        );
+      } else {
+        // If product does not exist, add it to productListDisplay
+        productListDisplay
+            .add(product.copyWith(quantity: product.quantity + 1));
+      }
+
+      emit(ProductLoaded(productListDisplay));
+      key = UniqueKey();
+    } catch (e) {
+      // Handle the error state
+      emit(ProductError(e.toString()));
+    }
+  }
 
   // Method to return PlutoRow list
   List<PlutoRow> plutoRow() {
-
-    List<ProductModel> returnList= productListDisplay.isEmpty? productList: productListDisplay;
-
+    List<ProductModel> returnList =
+        productListDisplay.isEmpty ? productList : productListDisplay;
 
     return returnList
         .map((product) => PlutoRow(cells: {
@@ -365,11 +363,10 @@ Future<void> fetchProductByBarcode(String barcode) async {
     return pw.Font.ttf(fontData);
   }
 
-  pw.Widget _productTable(pw.Font regularFont) {
+  pw.Widget _productTable(pw.Font regularFont, List<ProductModel> returnList) {
     return pw.Table(
       tableWidth: pw.TableWidth.max,
-      border: pw.TableBorder.all(
-          style: pw.BorderStyle.none), // Add borders to the table
+      border: pw.TableBorder.all(style: pw.BorderStyle.none),
       columnWidths: {
         0: const pw.FlexColumnWidth(2), // Products column width
         1: const pw.FlexColumnWidth(2), // Quantity column width
@@ -377,6 +374,7 @@ Future<void> fetchProductByBarcode(String barcode) async {
         3: const pw.FlexColumnWidth(2), // Total column width
       },
       children: [
+        // Header row
         pw.TableRow(
           decoration: const pw.BoxDecoration(color: PdfColors.grey200),
           children: [
@@ -410,15 +408,16 @@ Future<void> fetchProductByBarcode(String barcode) async {
             ),
           ].reversed.toList(),
         ),
-        _productTableRow('منتج 1', 4, 300, regularFont),
-        _productTableRow('منتج 2', 1, 100, regularFont),
-        _productTableRow('منتج 3', 1, 100, regularFont),
+        // Product rows
+        for (var product in returnList)
+          _productTableRow(
+              product.name, product.quantity, product.price, regularFont),
       ],
     );
   }
 
   pw.TableRow _productTableRow(
-      String itemName, int quantity, double price, pw.Font regularFont) {
+      String itemName, double quantity, double price, pw.Font regularFont) {
     double total = quantity * price;
     return pw.TableRow(
       children: [
@@ -818,6 +817,8 @@ Future<void> fetchProductByBarcode(String barcode) async {
 
     final pw.Widget qrCodeWidget = await _qrCodePlaceholder();
     final pw.Widget logoWidget = await _logoPlaceholder(regularFont);
+    List<ProductModel> returnList =
+        productListDisplay.isEmpty ? productList : productListDisplay;
 
     pdf.addPage(
       pw.MultiPage(
@@ -831,8 +832,8 @@ Future<void> fetchProductByBarcode(String barcode) async {
               _invoiceDetails(regularFont),
               dottedDivider(),
               pw.SizedBox(height: 20),
-              _productTable(
-                  regularFont), // Automatically splits table across pages
+              _productTable(regularFont,
+                  returnList), // Automatically splits table across pages
               pw.SizedBox(height: 10),
               _summary(regularFont),
               pw.SizedBox(height: 20),
