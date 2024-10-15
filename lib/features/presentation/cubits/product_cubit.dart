@@ -50,17 +50,17 @@ class ProductCubit extends Cubit<ProductState> {
         name: "Mixer 2200W",
         price: 297.00,
         barcodeNumber: 100250131070,
-        quantity: 1),
+        quantity: 0),
     ProductModel(
         name: "Oven 80L",
         price: 629.00,
         barcodeNumber: 9788179927687,
-        quantity: 1),
+        quantity: 0),
     ProductModel(
         name: "Cake Maker 1600W",
         price: 629.00,
         barcodeNumber: 30,
-        quantity: 1),
+        quantity: 0),
   ];
 
   void addProduct() {

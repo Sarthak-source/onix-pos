@@ -8,7 +8,7 @@ class ProductModel {
     required this.barcodeNumber,
     required this.name,
     required this.price,
-    this.quantity = 1, // Default quantity to 1
+    this.quantity = 0, // Default quantity to 1
   });
 
   // Factory constructor to create an instance of ProductModel from JSON
