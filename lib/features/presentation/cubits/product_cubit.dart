@@ -1,8 +1,10 @@
 import 'dart:developer';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:http/http.dart' as http;
 import 'package:onix_pos/core/style/app_colors.dart';
 import 'package:onix_pos/features/presentation/widgets/pdf_view.dart';
 import 'package:pdf/pdf.dart';
@@ -239,18 +241,14 @@ class ProductCubit extends Cubit<ProductState> {
                     InkWell(
                       onTap: () {
                         log(rendererContext.stateManager.currentRow!.cells
-                                  .toString());
-                              int currentQuantity =
-                                  rendererContext.cell.value ?? 0;
-                              if (currentQuantity > 0) {
-                                rendererContext
-                                    .stateManager
-                                    .currentRow!
-                                    .cells['quantity']!
-                                    .value = currentQuantity - 1;
-                                // Notify the state manager that the row has changed
-                                rendererContext.stateManager.notifyListeners();
-                              }
+                            .toString());
+                        int currentQuantity = rendererContext.cell.value ?? 0;
+                        if (currentQuantity > 0) {
+                          rendererContext.stateManager.currentRow!
+                              .cells['quantity']!.value = currentQuantity - 1;
+                          // Notify the state manager that the row has changed
+                          rendererContext.stateManager.notifyListeners();
+                        }
                       },
                       child: Padding(
                         padding: const EdgeInsets.all(1.0),
@@ -259,7 +257,11 @@ class ProductCubit extends Cubit<ProductState> {
                             shape: BoxShape.circle,
                             color: Colors.white,
                           ),
-                          child: const Icon(Icons.remove, color: Colors.grey,size: 35,),
+                          child: const Icon(
+                            Icons.remove,
+                            color: Colors.grey,
+                            size: 35,
+                          ),
                         ),
                       ),
                     ),
@@ -285,7 +287,11 @@ class ProductCubit extends Cubit<ProductState> {
                             shape: BoxShape.circle,
                             color: Colors.white,
                           ),
-                          child: const Icon(Icons.add, color: Colors.blue,size: 35,),
+                          child: const Icon(
+                            Icons.add,
+                            color: Colors.blue,
+                            size: 35,
+                          ),
                         ),
                       ),
                     ),
@@ -707,107 +713,129 @@ class ProductCubit extends Cubit<ProductState> {
   }
 
   Future<pw.Widget> _logoPlaceholder(pw.Font regularFont) async {
-    Uint8List data =
-        (await rootBundle.load('qasr_logo.png')).buffer.asUint8List();
+    const String imageUrl = 'https://i.imgur.com/Xh4atWw.png';
 
-    return pw.Container(
-      padding: const pw.EdgeInsets.only(top: 10, bottom: 10),
-      // decoration: pw.BoxDecoration(
-      //   border: pw.Border.all(color: PdfColors.grey300),
-      //   borderRadius: pw.BorderRadius.circular(5),
-      // ),
-      child: pw.Row(
-        crossAxisAlignment: pw.CrossAxisAlignment.start,
-        children: [
-          pw.SizedBox(width: 20),
-          pw.Expanded(
-            flex: 2,
-            child: pw.Column(
-              crossAxisAlignment: pw.CrossAxisAlignment.center,
-              children: [
-                pw.Center(
-                  child: pw.Container(
-                    // decoration: pw.BoxDecoration(
-                    //   border: pw.Border.all(color: PdfColor.fromHex('#819AA7'), width: 2),
-                    //   borderRadius: pw.BorderRadius.circular(8),
-                    // ),
-                    child: pw.Image(
-                      pw.MemoryImage(
-                        data,
+    final response = await http.get(Uri.parse(imageUrl));
+    if (response.statusCode == 200) {
+      Uint8List data = response.bodyBytes;
+
+      return pw.Container(
+        padding: const pw.EdgeInsets.only(top: 10, bottom: 10),
+        // decoration: pw.BoxDecoration(
+        //   border: pw.Border.all(color: PdfColors.grey300),
+        //   borderRadius: pw.BorderRadius.circular(5),
+        // ),
+        child: pw.Row(
+          crossAxisAlignment: pw.CrossAxisAlignment.start,
+          children: [
+            pw.SizedBox(width: 20),
+            pw.Expanded(
+              flex: 2,
+              child: pw.Column(
+                crossAxisAlignment: pw.CrossAxisAlignment.center,
+                children: [
+                  pw.Center(
+                    child: pw.Container(
+                      // decoration: pw.BoxDecoration(
+                      //   border: pw.Border.all(color: PdfColor.fromHex('#819AA7'), width: 2),
+                      //   borderRadius: pw.BorderRadius.circular(8),
+                      // ),
+                      child: pw.Image(
+                        pw.MemoryImage(
+                          data,
+                        ),
+                        height: 100,
+                        width: 150,
+                        fit: pw.BoxFit.contain,
                       ),
-                      height: 100,
-                      width: 150,
-                      fit: pw.BoxFit.contain,
                     ),
                   ),
-                ),
-                pw.SizedBox(height: 10),
-                pw.Text(
-                  'فاتورة ضريبية مبسطة: #2455',
-                  style: pw.TextStyle(
-                    fontSize: 14,
-                    font: regularFont,
-                  ),
-                  textDirection: pw.TextDirection.rtl,
-                ),
-                pw.SizedBox(height: 10),
-                pw.Text(
-                  'إسم التاجر قصر الأواني',
-                  style: pw.TextStyle(
-                    fontSize: 14,
-                    font: regularFont,
-                    color: const PdfColor.fromInt(0xFF0C69C0),
-                  ),
-                  textDirection: pw.TextDirection.rtl,
-                ),
-                pw.SizedBox(height: 10),
-                pw.Row(
-                  mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-                  children: [
-                    pw.Text(
-                      'رقم الفاتورة 1225498494',
-                      style: pw.TextStyle(
-                        fontSize: 14,
-                        font: regularFont,
-                      ),
-                      textDirection: pw.TextDirection.rtl,
+                  pw.SizedBox(height: 10),
+                  pw.Text(
+                    'فاتورة ضريبية مبسطة: #2455',
+                    style: pw.TextStyle(
+                      fontSize: 14,
+                      font: regularFont,
                     ),
-                    pw.Text(
-                      'الرقم الضريبي 1225498494',
-                      style: pw.TextStyle(
-                        fontSize: 14,
-                        font: regularFont,
-                      ),
-                      textDirection: pw.TextDirection.rtl,
+                    textDirection: pw.TextDirection.rtl,
+                  ),
+                  pw.SizedBox(height: 10),
+                  pw.Text(
+                    'إسم التاجر قصر الأواني',
+                    style: pw.TextStyle(
+                      fontSize: 14,
+                      font: regularFont,
+                      color: const PdfColor.fromInt(0xFF0C69C0),
                     ),
-                  ],
-                ),
-              ],
+                    textDirection: pw.TextDirection.rtl,
+                  ),
+                  pw.SizedBox(height: 10),
+                  pw.Row(
+                    mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                    children: [
+                      pw.Text(
+                        'رقم الفاتورة 1225498494',
+                        style: pw.TextStyle(
+                          fontSize: 14,
+                          font: regularFont,
+                        ),
+                        textDirection: pw.TextDirection.rtl,
+                      ),
+                      pw.Text(
+                        'الرقم الضريبي 1225498494',
+                        style: pw.TextStyle(
+                          fontSize: 14,
+                          font: regularFont,
+                        ),
+                        textDirection: pw.TextDirection.rtl,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
-      ),
-    );
+          ],
+        ),
+      );
+    } else {
+      return pw.Center(
+        child: pw.Text('Failed to load image'),
+      );
+    }
   }
 
   Future<pw.Widget> _qrCodePlaceholder() async {
-    Uint8List data =
-        (await rootBundle.load('assets/qrcode.png')).buffer.asUint8List();
+    const String imageUrl =
+        'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTQCD0vGmt0p-HZ_Xe6LGeDbOEyWqAl6mL7hA&s';
 
-    return pw.Center(
-      child: pw.Container(
-        child: pw.Image(
-          pw.MemoryImage(
-            data,
+    // Fetch the image from the web
+    final response = await http.get(Uri.parse(imageUrl));
+
+    if (response.statusCode == 200) {
+      // If the server returns OK, get the image bytes
+      Uint8List data = response.bodyBytes;
+
+      return pw.Center(
+        child: pw.Container(
+          child: pw.Image(
+            pw.MemoryImage(
+              data,
+            ),
+            fit: pw.BoxFit.contain,
           ),
-          fit: pw.BoxFit.contain,
         ),
-      ),
-    );
+      );
+    } else {
+      // Handle errors by returning a placeholder
+      return pw.Center(
+        child: pw.Text('Failed to load image'),
+      );
+    }
   }
 
 // Print order functionality
   Future<void> generateInvoice(BuildContext context) async {
+    log('hello');
     final pdf = pw.Document();
 
     //final pw.Font boldFont = await loadFont('assets/Cairo-Bold.ttf');
