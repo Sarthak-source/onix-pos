@@ -45,7 +45,7 @@ class ProductOrderView extends StatelessWidget {
                 final productCubit = context.read<ProductCubit>();
                 if (state is ProductLoading) {
                   return PlutoGrid(
-                    columns: context.read<ProductCubit>().column,
+                    columns: context.read<ProductCubit>().column(),
                     rows: context
                         .read<ProductCubit>()
                         .plutoRow(), // Call to refresh rows
@@ -53,11 +53,12 @@ class ProductOrderView extends StatelessWidget {
                   );
                 } else if (state is ProductLoaded) {
                   return SizedBox(
-                    height: rowHeight*context.read<ProductCubit>().column.length*0.5,
+                    height: rowHeight *
+                        context.read<ProductCubit>().column().length *
+                        0.5,
                     child: PlutoGrid(
                       key: productCubit.key,
-                      
-                      columns: context.read<ProductCubit>().column,
+                      columns: context.read<ProductCubit>().column(),
                       rows: context.read<ProductCubit>().plutoRow(),
                       configuration: PlutoGridConfiguration(
                         enableMoveDownAfterSelecting: true,
@@ -101,7 +102,7 @@ class ProductOrderView extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
-           CustomDateRangePicker(),
+          CustomDateRangePicker(),
           const SizedBox(height: 16),
           // Print Button
           CustomTextIconButton(

@@ -74,7 +74,7 @@ class ProductCubit extends Cubit<ProductState> {
     emit(ProductLoading());
 
     final barcode = barcodeController.text.trim();
-    defaultQuantityController = TextEditingController(text: '1');
+    //defaultQuantityController = TextEditingController(text: '1');
 
     // Check if the barcode is empty
     if (barcode.isEmpty) {
@@ -180,68 +180,131 @@ class ProductCubit extends Cubit<ProductState> {
     }
   }
 
-  // Method to return PlutoRow list
-  List<PlutoRow> plutoRow() {
+  List<ProductModel> returnList() {
     List<ProductModel> returnList =
         productListDisplay.isEmpty ? productList : productListDisplay;
+    return returnList;
+  }
 
-    return returnList
-        .map((product) => PlutoRow(cells: {
-              'name': PlutoCell(value: product.name),
-              'unit': PlutoCell(value: 'pcs'),
-              'quantity': PlutoCell(
-                  value: product.quantity,
-                  key: Key(product.barcodeNumber.toString())),
-              'price': PlutoCell(value: product.price),
-              'delete': PlutoCell(value: 'delete'),
-              'product': PlutoCell(value: product), // Store the product object
-            }))
+  void updateQuantity(String barcode, bool increment) {
+    final productIndex = productListDisplay.indexWhere(
+      (product) => product.barcodeNumber.toString() == barcode,
+    );
+
+    if (productIndex >= 0) {
+      final currentProduct = productListDisplay[productIndex];
+      double newQuantity = increment
+          ? currentProduct.quantity + 1 // Increment quantity
+          : (currentProduct.quantity > 0
+              ? currentProduct.quantity - 1
+              : 0); // Decrement quantity
+
+      productListDisplay[productIndex] =
+          currentProduct.copyWith(quantity: newQuantity);
+      emit(ProductLoaded(productListDisplay));
+    }
+  }
+
+  // Example usage in button's onTap
+  void onIncrementButtonPressed(String barcode) {
+    updateQuantity(barcode, true); // Increment
+  }
+
+  void onDecrementButtonPressed(String barcode) {
+    updateQuantity(barcode, false); // Decrement
+  }
+
+  void updateProductQuantity(String barcode, double newQuantity) {
+    final productIndex = productList.indexWhere(
+      (product) => product.barcodeNumber.toString() == barcode,
+    );
+
+    if (productIndex >= 0) {
+      // Update the quantity of the product in the main productList
+      productList[productIndex] =
+          productList[productIndex].copyWith(quantity: newQuantity);
+
+      // Check if the product already exists in productListDisplay
+      final existingIndex = productListDisplay.indexWhere(
+        (p) => p.barcodeNumber == productList[productIndex].barcodeNumber,
+      );
+
+      if (existingIndex >= 0) {
+        // If product exists in productListDisplay, update its quantity
+        productListDisplay[existingIndex] =
+            productList[productIndex].copyWith(quantity: newQuantity);
+      } else {
+        // If product does not exist, add it to productListDisplay
+        productListDisplay
+            .add(productList[productIndex].copyWith(quantity: newQuantity));
+      }
+
+      emit(ProductLoaded(productListDisplay));
+    } else {
+      emit(ProductError('Product not found for the provided barcode.'));
+    }
+  }
+
+  // Method to return PlutoRow list
+  List<PlutoRow> plutoRow() {
+    return returnList()
+        .map(
+          (product) => PlutoRow(cells: {
+            'name': PlutoCell(value: product.name),
+            'unit': PlutoCell(value: 'pcs'),
+            'quantity': PlutoCell(value: product.quantity),
+            'price': PlutoCell(value: product.price),
+            'delete': PlutoCell(value: 'delete'),
+            'product': PlutoCell(value: product), // Store the product object
+          }, key: Key(product.barcodeNumber.toString())),
+        )
         .toList();
   }
 
   // Define PlutoColumn List
-  List<PlutoColumn> column = [
-    PlutoColumn(
-      title: 'Name',
-      field: 'name',
-      type: PlutoColumnType.text(),
-      width: PlutoGridSettings.minColumnWidth * 3,
-      textAlign: PlutoColumnTextAlign.center,
-      suppressedAutoSize: true,
-      enableDropToResize: false,
-      enableSorting: false,
-      backgroundColor: kSkyDarkColor,
-    ),
-    PlutoColumn(
-      title: 'Unit',
-      field: 'unit',
-      type: PlutoColumnType.text(),
-      width: PlutoGridSettings.minColumnWidth * 3,
-      textAlign: PlutoColumnTextAlign.center,
-      suppressedAutoSize: true,
-      enableDropToResize: false,
-      enableSorting: false,
-      backgroundColor: kSkyDarkColor,
-    ),
-    PlutoColumn(
-      title: 'Quantity',
-      field: 'quantity',
-      width: PlutoGridSettings.minColumnWidth * 3,
-      type: PlutoColumnType.text(),
-      textAlign: PlutoColumnTextAlign.center,
-      suppressedAutoSize: true,
-      enableDropToResize: false,
-      enableSorting: false,
-      readOnly: true,
-      enableEditingMode: false, // Disables editing mode for this column
-  enableAutoEditing: false,
-  
-      backgroundColor: kSkyDarkColor,
-      renderer: (rendererContext) {
-        PlutoCell? quantityCell =
-            rendererContext.stateManager.currentRow?.cells['quantity'];
+  List<PlutoColumn> column() {
+    return [
+      PlutoColumn(
+        title: 'Name',
+        field: 'name',
+        type: PlutoColumnType.text(),
+        width: PlutoGridSettings.minColumnWidth * 3,
+        textAlign: PlutoColumnTextAlign.center,
+        suppressedAutoSize: true,
+        enableDropToResize: false,
+        enableSorting: false,
+        backgroundColor: kSkyDarkColor,
+      ),
+      PlutoColumn(
+        title: 'Unit',
+        field: 'unit',
+        type: PlutoColumnType.text(),
+        width: PlutoGridSettings.minColumnWidth * 3,
+        textAlign: PlutoColumnTextAlign.center,
+        suppressedAutoSize: true,
+        enableDropToResize: false,
+        enableSorting: false,
+        backgroundColor: kSkyDarkColor,
+      ),
+      PlutoColumn(
+        title: 'Quantity',
+        field: 'quantity',
+        width: PlutoGridSettings.minColumnWidth * 3,
+        type: PlutoColumnType.text(),
+        textAlign: PlutoColumnTextAlign.center,
+        suppressedAutoSize: true,
+        enableDropToResize: false,
+        enableSorting: false,
+        readOnly: true,
+        enableEditingMode: false, // Disables editing mode for this column
+        enableAutoEditing: false,
 
-        return  Center(
+        backgroundColor: kSkyDarkColor,
+        renderer: (rendererContext) {
+          PlutoCell? quantityCell =
+              rendererContext.stateManager.currentRow?.cells['quantity'];
+
+          return Center(
             child: Padding(
               padding: const EdgeInsets.all(0.0),
               child: Transform.scale(
@@ -298,6 +361,14 @@ class ProductCubit extends Cubit<ProductState> {
                           if (quantityCell != null) {
                             int currentQuantity = quantityCell.value ?? 0;
 
+                            final barcode = rendererContext
+                                .stateManager
+                                .currentRow
+                                ?.cells['product']
+                                ?.value
+                                ?.barcodeNumber
+                                .toString();
+
                             // Update the cell's value
                             rendererContext.stateManager.changeCellValue(
                               quantityCell,
@@ -307,6 +378,11 @@ class ProductCubit extends Cubit<ProductState> {
 
                             // Notify PlutoGrid that the data has changed
                             rendererContext.stateManager.notifyListeners();
+
+                            updateProductQuantity(
+                                barcode ?? '',
+                                currentQuantity +
+                                    1); // Update with the new quantity
                           }
                         },
                         child: Padding(
@@ -329,41 +405,41 @@ class ProductCubit extends Cubit<ProductState> {
                 ),
               ),
             ),
-          
-        );
-      },
-    ),
-    PlutoColumn(
-      title: 'Price',
-      field: 'price',
-      width: PlutoGridSettings.minColumnWidth * 3,
-      type: PlutoColumnType.text(),
-      textAlign: PlutoColumnTextAlign.center,
-      suppressedAutoSize: true,
-      enableDropToResize: false,
-      enableSorting: false,
-      backgroundColor: kSkyDarkColor,
-    ),
-    PlutoColumn(
-      title: 'Delete',
-      field: 'delete',
-      width: PlutoGridSettings.minColumnWidth * 3,
-      type: PlutoColumnType.text(),
-      textAlign: PlutoColumnTextAlign.center,
-      suppressedAutoSize: true,
-      enableDropToResize: false,
-      enableSorting: false,
-      backgroundColor: kSkyDarkColor,
-      renderer: (rendererContext) {
-        return IconButton(
-          icon: const Icon(Icons.delete, color: Colors.red),
-          onPressed: () {
-            rendererContext.stateManager.removeRows([rendererContext.row]);
-          },
-        );
-      },
-    ),
-  ];
+          );
+        },
+      ),
+      PlutoColumn(
+        title: 'Price',
+        field: 'price',
+        width: PlutoGridSettings.minColumnWidth * 3,
+        type: PlutoColumnType.text(),
+        textAlign: PlutoColumnTextAlign.center,
+        suppressedAutoSize: true,
+        enableDropToResize: false,
+        enableSorting: false,
+        backgroundColor: kSkyDarkColor,
+      ),
+      PlutoColumn(
+        title: 'Delete',
+        field: 'delete',
+        width: PlutoGridSettings.minColumnWidth * 3,
+        type: PlutoColumnType.text(),
+        textAlign: PlutoColumnTextAlign.center,
+        suppressedAutoSize: true,
+        enableDropToResize: false,
+        enableSorting: false,
+        backgroundColor: kSkyDarkColor,
+        renderer: (rendererContext) {
+          return IconButton(
+            icon: const Icon(Icons.delete, color: Colors.red),
+            onPressed: () {
+              rendererContext.stateManager.removeRows([rendererContext.row]);
+            },
+          );
+        },
+      ),
+    ];
+  }
 
   // Fetch products
   void fetchProducts() {
@@ -874,8 +950,6 @@ class ProductCubit extends Cubit<ProductState> {
 
     final pw.Widget qrCodeWidget = await _qrCodePlaceholder();
     final pw.Widget logoWidget = await _logoPlaceholder(regularFont);
-    List<ProductModel> returnList =
-        productListDisplay.isEmpty ? productList : productListDisplay;
 
     pdf.addPage(
       pw.MultiPage(
@@ -890,7 +964,7 @@ class ProductCubit extends Cubit<ProductState> {
               dottedDivider(),
               pw.SizedBox(height: 20),
               _productTable(regularFont,
-                  returnList), // Automatically splits table across pages
+                  returnList()), // Automatically splits table across pages
               pw.SizedBox(height: 10),
               _summary(regularFont),
               pw.SizedBox(height: 20),
