@@ -236,30 +236,30 @@ class ProductCubit extends Cubit<ProductState> {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Padding(
-                      padding: const EdgeInsets.all(1.0),
-                      child: Container(
-                        decoration: const BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.white,
-                        ),
-                        child: IconButton(
-                          icon: const Icon(Icons.remove, color: Colors.grey),
-                          onPressed: () {
-                            log(rendererContext.stateManager.currentRow!.cells
-                                .toString());
-                            int currentQuantity =
-                                rendererContext.cell.value ?? 0;
-                            if (currentQuantity > 0) {
-                              rendererContext
-                                  .stateManager
-                                  .currentRow!
-                                  .cells['quantity']!
-                                  .value = currentQuantity - 1;
-                              // Notify the state manager that the row has changed
-                              rendererContext.stateManager.notifyListeners();
-                            }
-                          },
+                    InkWell(
+                      onTap: () {
+                        log(rendererContext.stateManager.currentRow!.cells
+                                  .toString());
+                              int currentQuantity =
+                                  rendererContext.cell.value ?? 0;
+                              if (currentQuantity > 0) {
+                                rendererContext
+                                    .stateManager
+                                    .currentRow!
+                                    .cells['quantity']!
+                                    .value = currentQuantity - 1;
+                                // Notify the state manager that the row has changed
+                                rendererContext.stateManager.notifyListeners();
+                              }
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.all(1.0),
+                        child: Container(
+                          decoration: const BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.white,
+                          ),
+                          child: const Icon(Icons.remove, color: Colors.grey,size: 35,),
                         ),
                       ),
                     ),
@@ -270,23 +270,22 @@ class ProductCubit extends Cubit<ProductState> {
                         style: const TextStyle(fontSize: 16.0),
                       ),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.all(1.0),
-                      child: Container(
-                        decoration: const BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.white,
-                        ),
-                        child: IconButton(
-                          icon: const Icon(Icons.add, color: Colors.blue),
-                          onPressed: () {
-                            int currentQuantity =
-                                rendererContext.cell.value ?? 0;
-                            rendererContext.stateManager.currentRow!
-                                .cells['quantity']!.value = currentQuantity + 1;
-                            // Notify the state manager that the row has changed
-                            rendererContext.stateManager.notifyListeners();
-                          },
+                    InkWell(
+                      onTap: () {
+                        int currentQuantity = rendererContext.cell.value ?? 0;
+                        rendererContext.stateManager.currentRow!
+                            .cells['quantity']!.value = currentQuantity + 1;
+                        // Notify the state manager that the row has changed
+                        rendererContext.stateManager.notifyListeners();
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.all(1.0),
+                        child: Container(
+                          decoration: const BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.white,
+                          ),
+                          child: const Icon(Icons.add, color: Colors.blue,size: 35,),
                         ),
                       ),
                     ),
