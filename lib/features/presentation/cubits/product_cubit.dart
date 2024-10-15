@@ -34,6 +34,15 @@ class ProductError extends ProductState {
 class ProductCubit extends Cubit<ProductState> {
   ProductCubit() : super(ProductInitial());
 
+  late PlutoGridStateManager stateManagerProviders;
+
+  UniqueKey key = UniqueKey();
+
+  TextEditingController defaultQuantityController = TextEditingController();
+  TextEditingController barcodeController = TextEditingController();
+
+  List<ProductModel> productListDisplay = [];
+
   List<ProductModel> productList = [
     ProductModel(
         name: "Mixer 2200W",
@@ -52,49 +61,123 @@ class ProductCubit extends Cubit<ProductState> {
         quantity: 1),
   ];
 
-  Future<void> fetchProductByBarcode(String barcode) async {
-    emit(ProductLoading());
+  
 
-    try {
-      // Check if the barcode is empty
-      if (barcode.isEmpty) {
-        emit(ProductError('Barcode cannot be empty.'));
-        return;
-      }
+  void addProduct() {
+  emit(ProductLoading());
 
-      // Simulate network delay or database query
-      await Future.delayed(const Duration(seconds: 2));
+  final barcode = barcodeController.text.trim();
 
-      // Find the product by barcode
-      productList = [
-        productList.firstWhere(
-          (product) => product.barcodeNumber.toString() == barcode.trim(),
-          orElse: () => throw Exception('Product not found'),
-        )
-      ];
-
-      emit(ProductLoaded(productList));
-
-      key = UniqueKey();
-
-      // Emit ProductLoaded with the found product
-      emit(ProductLoaded(productList));
-    } catch (e) {
-      // Handle the error state
-      emit(ProductError(e.toString()));
-    }
+  // Check if the barcode is empty
+  if (barcode.isEmpty) {
+    emit(ProductError('Barcode cannot be empty.'));
+    return;
   }
 
-  late PlutoGridStateManager stateManagerProviders;
+  // Try to find the product by barcode
+  try {
+    final product = productList.firstWhere(
+      (product) => product.barcodeNumber.toString() == barcode,
+      orElse: () => throw Exception('Product not found'),
+    );
 
-  UniqueKey key = UniqueKey();
+    double additionalQuantity = double.tryParse(defaultQuantityController.text) ?? 0.0;
 
-  TextEditingController defaultQuantityController = TextEditingController();
-  TextEditingController barcodeController = TextEditingController();
+    // Update the product's quantity in the main productList
+    productList = productList.map((p) {
+      if (p.barcodeNumber == product.barcodeNumber) {
+        return p.copyWith(quantity: p.quantity + additionalQuantity);
+      }
+      return p;
+    }).toList();
+
+    // Check if the product already exists in productListDisplay
+    final existingIndex = productListDisplay.indexWhere(
+      (p) => p.barcodeNumber == product.barcodeNumber,
+    );
+
+    if (existingIndex >= 0) {
+      // If product exists in productListDisplay, update its quantity
+      productListDisplay[existingIndex] = product.copyWith(
+        quantity: product.quantity + additionalQuantity,
+      );
+    } else {
+      // If product does not exist, add it to productListDisplay
+      productListDisplay.add(
+        product.copyWith(quantity: product.quantity + additionalQuantity),
+      );
+    }
+
+    emit(ProductLoaded(productListDisplay));
+    key = UniqueKey();
+  } catch (e) {
+    // Handle the error if no product matches the barcode
+    emit(ProductError(e.toString()));
+  }
+
+  // Clear the controllers
+  defaultQuantityController.clear();
+  barcodeController.clear();
+}
+
+Future<void> fetchProductByBarcode(String barcode) async {
+  emit(ProductLoading());
+
+  try {
+    // Check if the barcode is empty
+    if (barcode.isEmpty) {
+      emit(ProductError('Barcode cannot be empty.'));
+      return;
+    }
+
+    // Simulate network delay or database query
+    await Future.delayed(const Duration(seconds: 2));
+
+    // Find the product by barcode
+    final product = productList.firstWhere(
+      (product) => product.barcodeNumber.toString() == barcode,
+      orElse: () => throw Exception('Product not found'),
+    );
+
+    // Update the product's quantity in the main productList
+    productList = productList.map((p) {
+      if (p.barcodeNumber == product.barcodeNumber) {
+        return p.copyWith(quantity: p.quantity + 1);
+      }
+      return p;
+    }).toList();
+
+    // Check if the product already exists in productListDisplay
+    final existingIndex = productListDisplay.indexWhere(
+      (p) => p.barcodeNumber == product.barcodeNumber,
+    );
+
+    if (existingIndex >= 0) {
+      // If product exists in productListDisplay, update its quantity
+      productListDisplay[existingIndex] = product.copyWith(
+        quantity: product.quantity + 1,
+      );
+    } else {
+      // If product does not exist, add it to productListDisplay
+      productListDisplay.add(product.copyWith(quantity: product.quantity + 1));
+    }
+
+    emit(ProductLoaded(productListDisplay));
+    key = UniqueKey();
+  } catch (e) {
+    // Handle the error state
+    emit(ProductError(e.toString()));
+  }
+}
+
 
   // Method to return PlutoRow list
   List<PlutoRow> plutoRow() {
-    return productList
+
+    List<ProductModel> returnList= productListDisplay.isEmpty? productList: productListDisplay;
+
+
+    return returnList
         .map((product) => PlutoRow(cells: {
               'name': PlutoCell(value: product.name),
               'unit': PlutoCell(value: 'pcs'),
@@ -276,38 +359,6 @@ class ProductCubit extends Cubit<ProductState> {
   }
 
   // Delete a product
-
-  void addProduct() {
-    emit(ProductLoading());
-
-    final barcode = barcodeController.text.trim();
-
-    // Check if the barcode is empty
-    if (barcode.isEmpty) {
-      emit(ProductError('Barcode cannot be empty.'));
-      return;
-    }
-
-    // Try to find the product by barcode
-    try {
-      final product = productList.firstWhere(
-        (product) => product.barcodeNumber.toString() == barcode,
-        orElse: () => throw Exception('Product not found'),
-      );
-
-      // If found, update the productList to only include the found product
-      productList = [product];
-
-      emit(ProductLoaded(productList));
-    } catch (e) {
-      // Handle the error if no product matches the barcode
-      emit(ProductError(e.toString()));
-    }
-
-    // Clear the controllers
-    defaultQuantityController.clear();
-    barcodeController.clear();
-  }
 
   Future<pw.Font> loadFont(String path) async {
     final fontData = await rootBundle.load(path);
