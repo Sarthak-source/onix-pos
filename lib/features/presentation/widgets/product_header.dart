@@ -92,6 +92,15 @@ class HeaderComponent extends StatelessWidget {
                           labelText: 'رقم الباركود',
                           elevation: 0,
                           isRequired: true,
+                          onChanged: (v) {
+                            if (productCubit.isValidBarcode(v)) {
+                              productCubit.defaultQuantityController.text = '1';
+                            } else {
+                              // Optionally handle invalid barcode (e.g., show an error message)
+                              productCubit.defaultQuantityController.text = '';
+                              //print('Invalid barcode');
+                            }
+                          },
                           suffixIcon: BarcodeKeyboardListener(
                             onBarcodeScanned: (barcode) {
                               productCubit.barcodeController.text = barcode;

@@ -63,10 +63,18 @@ class ProductCubit extends Cubit<ProductState> {
         quantity: 0),
   ];
 
+  bool isValidBarcode(String barcode) {
+    // Example validation: check if the barcode is not empty and has 13 digits
+    return barcode.isNotEmpty &&
+        barcode.length == 13 &&
+        RegExp(r'^[0-9]+$').hasMatch(barcode);
+  }
+
   void addProduct() {
     emit(ProductLoading());
 
     final barcode = barcodeController.text.trim();
+    defaultQuantityController = TextEditingController(text: '1');
 
     // Check if the barcode is empty
     if (barcode.isEmpty) {
@@ -181,7 +189,9 @@ class ProductCubit extends Cubit<ProductState> {
         .map((product) => PlutoRow(cells: {
               'name': PlutoCell(value: product.name),
               'unit': PlutoCell(value: 'pcs'),
-              'quantity': PlutoCell(value: product.quantity),
+              'quantity': PlutoCell(
+                  value: product.quantity,
+                  key: Key(product.barcodeNumber.toString())),
               'price': PlutoCell(value: product.price),
               'delete': PlutoCell(value: 'delete'),
               'product': PlutoCell(value: product), // Store the product object
@@ -222,84 +232,104 @@ class ProductCubit extends Cubit<ProductState> {
       suppressedAutoSize: true,
       enableDropToResize: false,
       enableSorting: false,
+      readOnly: true,
+      enableEditingMode: false, // Disables editing mode for this column
+  enableAutoEditing: false,
+  
       backgroundColor: kSkyDarkColor,
       renderer: (rendererContext) {
-        return Center(
-          child: Padding(
-            padding: const EdgeInsets.all(0.0),
-            child: Transform.scale(
-              scale: 0.8,
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 1.0),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(20.0),
-                  color: Colors.grey[200],
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    InkWell(
-                      onTap: () {
-                        log(rendererContext.stateManager.currentRow!.cells
-                            .toString());
-                        int currentQuantity = rendererContext.cell.value ?? 0;
-                        if (currentQuantity > 0) {
-                          rendererContext.stateManager.currentRow!
-                              .cells['quantity']!.value = currentQuantity - 1;
-                          // Notify the state manager that the row has changed
-                          rendererContext.stateManager.notifyListeners();
-                        }
-                      },
-                      child: Padding(
-                        padding: const EdgeInsets.all(1.0),
-                        child: Container(
-                          decoration: const BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Colors.white,
-                          ),
-                          child: const Icon(
-                            Icons.remove,
-                            color: Colors.grey,
-                            size: 35,
-                          ),
-                        ),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                      child: Text(
-                        rendererContext.cell.value.toString(),
-                        style: const TextStyle(fontSize: 16.0),
-                      ),
-                    ),
-                    InkWell(
-                      onTap: () {
-                        int currentQuantity = rendererContext.cell.value ?? 0;
-                        rendererContext.stateManager.currentRow!
-                            .cells['quantity']!.value = currentQuantity + 1;
-                        // Notify the state manager that the row has changed
-                        rendererContext.stateManager.notifyListeners();
-                      },
-                      child: Padding(
-                        padding: const EdgeInsets.all(1.0),
-                        child: Container(
-                          decoration: const BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Colors.white,
-                          ),
-                          child: const Icon(
-                            Icons.add,
-                            color: Colors.blue,
-                            size: 35,
+        PlutoCell? quantityCell =
+            rendererContext.stateManager.currentRow?.cells['quantity'];
+
+        return  Center(
+            child: Padding(
+              padding: const EdgeInsets.all(0.0),
+              child: Transform.scale(
+                scale: 0.8,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 1.0),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(20.0),
+                    color: Colors.grey[200],
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      InkWell(
+                        onTap: () {
+                          if (quantityCell != null) {
+                            int currentQuantity = quantityCell.value ?? 0;
+
+                            // Update the cell's value
+                            rendererContext.stateManager.changeCellValue(
+                              quantityCell,
+                              currentQuantity > 1 ? (currentQuantity - 1) : 0,
+                              force: true, // Force update
+                            );
+
+                            // Notify PlutoGrid that the data has changed
+                            rendererContext.stateManager.notifyListeners();
+                          }
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.all(1.0),
+                          child: Container(
+                            decoration: const BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.white,
+                            ),
+                            child: const Icon(
+                              Icons.remove,
+                              color: Colors.grey,
+                              size: 35,
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  ],
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                        child: Text(
+                          rendererContext.cell.value.toString(),
+                          style: const TextStyle(fontSize: 16.0),
+                        ),
+                      ),
+                      InkWell(
+                        onTap: () {
+                          if (quantityCell != null) {
+                            int currentQuantity = quantityCell.value ?? 0;
+
+                            // Update the cell's value
+                            rendererContext.stateManager.changeCellValue(
+                              quantityCell,
+                              currentQuantity + 1,
+                              force: true, // Force update
+                            );
+
+                            // Notify PlutoGrid that the data has changed
+                            rendererContext.stateManager.notifyListeners();
+                          }
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.all(1.0),
+                          child: Container(
+                            decoration: const BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.white,
+                            ),
+                            child: const Icon(
+                              Icons.add,
+                              color: Colors.blue,
+                              size: 35,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
+          
         );
       },
     ),

@@ -56,6 +56,7 @@ class ProductOrderView extends StatelessWidget {
                     height: rowHeight*context.read<ProductCubit>().column.length*0.5,
                     child: PlutoGrid(
                       key: productCubit.key,
+                      
                       columns: context.read<ProductCubit>().column,
                       rows: context.read<ProductCubit>().plutoRow(),
                       configuration: PlutoGridConfiguration(
