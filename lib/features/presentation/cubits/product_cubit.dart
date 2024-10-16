@@ -120,6 +120,7 @@ class ProductCubit extends Cubit<ProductState> {
       emit(ProductLoaded(productListDisplay));
       key = UniqueKey();
     } catch (e) {
+      
       // Handle the error if no product matches the barcode
       emit(ProductError(e.toString()));
     }
@@ -320,6 +321,7 @@ class ProductCubit extends Cubit<ProductState> {
                     children: [
                       InkWell(
                         onTap: () {
+                          //key= UniqueKey();
                           if (quantityCell != null) {
                             int currentQuantity = quantityCell.value ?? 0;
 
@@ -333,6 +335,7 @@ class ProductCubit extends Cubit<ProductState> {
                             // Notify PlutoGrid that the data has changed
                             rendererContext.stateManager.notifyListeners();
                           }
+                          //rendererContext.stateManager.setCurrentCell(cell, rowIdx)
                         },
                         child: Padding(
                           padding: const EdgeInsets.all(1.0),
@@ -375,7 +378,6 @@ class ProductCubit extends Cubit<ProductState> {
                               currentQuantity + 1,
                               force: true, // Force update
                             );
-
                             // Notify PlutoGrid that the data has changed
                             rendererContext.stateManager.notifyListeners();
 
@@ -434,6 +436,7 @@ class ProductCubit extends Cubit<ProductState> {
             icon: const Icon(Icons.delete, color: Colors.red),
             onPressed: () {
               rendererContext.stateManager.removeRows([rendererContext.row]);
+              
             },
           );
         },

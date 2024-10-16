@@ -39,68 +39,67 @@ class ProductOrderView extends StatelessWidget {
 
           const SizedBox(height: 16),
           // Product List Table
-          Expanded(
-            child: BlocBuilder<ProductCubit, ProductState>(
-              builder: (context, state) {
-                final productCubit = context.read<ProductCubit>();
-                if (state is ProductLoading) {
-                  return PlutoGrid(
+          BlocBuilder<ProductCubit, ProductState>(
+            builder: (context, state) {
+              final productCubit = context.read<ProductCubit>();
+              if (state is ProductLoading) {
+                return PlutoGrid(
+                  columns: context.read<ProductCubit>().column(),
+                  rows: context
+                      .read<ProductCubit>()
+                      .plutoRow(), // Call to refresh rows
+                  // ...
+                );
+              } else if (state is ProductLoaded) {
+                return SizedBox(
+                  height: rowHeight *
+                      context.read<ProductCubit>().column().length *
+                      1,
+                  child: PlutoGrid(
+                    key: productCubit.key,
                     columns: context.read<ProductCubit>().column(),
-                    rows: context
-                        .read<ProductCubit>()
-                        .plutoRow(), // Call to refresh rows
-                    // ...
-                  );
-                } else if (state is ProductLoaded) {
-                  return SizedBox(
-                    height: rowHeight *
-                        context.read<ProductCubit>().column().length *
-                        0.5,
-                    child: PlutoGrid(
-                      key: productCubit.key,
-                      columns: context.read<ProductCubit>().column(),
-                      rows: context.read<ProductCubit>().plutoRow(),
-                      configuration: PlutoGridConfiguration(
-                        enableMoveDownAfterSelecting: true,
-                        style: PlutoGridStyleConfig(
-                          rowHeight: rowHeight,
-                          gridBorderRadius: BorderRadius.circular(4),
-                          cellTextStyle: AppTextStyles.styleRegular12(context,
-                              color: kTextColor),
-                          columnTextStyle: AppTextStyles.styleRegular12(context,
-                              color: whiteColor),
-                          iconSize: 12,
-                          defaultColumnFilterPadding:
-                              const EdgeInsets.symmetric(horizontal: 10),
-                          iconColor: dividerColor,
-                          activatedColor: whiteColor,
-                          activatedBorderColor: kPrimaryColor,
-                          disabledIconColor: dividerColor,
-                          borderColor: dividerColor,
-                          gridBorderColor: transparent,
-                        ),
-                        scrollbar: const PlutoGridScrollbarConfig(
-                          scrollbarThickness: 5,
-                          scrollBarColor: kCardGreenColor,
-                          scrollbarThicknessWhileDragging: 5,
-                        ),
+                    rows: context.read<ProductCubit>().plutoRow(),
+                    configuration: PlutoGridConfiguration(
+                      enableMoveDownAfterSelecting: true,
+                      style: PlutoGridStyleConfig(
+                        rowHeight: rowHeight,
+                        gridBorderRadius: BorderRadius.circular(4),
+                        cellTextStyle: AppTextStyles.styleRegular12(context,
+                            color: kTextColor),
+                        columnTextStyle: AppTextStyles.styleRegular12(context,
+                            color: whiteColor),
+                        iconSize: 12,
+                        defaultColumnFilterPadding:
+                            const EdgeInsets.symmetric(horizontal: 10),
+                        iconColor: dividerColor,
+                        activatedColor: whiteColor,
+                        activatedBorderColor: kPrimaryColor,
+                        disabledIconColor: dividerColor,
+                        borderColor: dividerColor,
+                        gridBorderColor: transparent,
                       ),
-                      rowColorCallback: (rowColorContext) {
-                        if (rowColorContext.rowIdx % 2 == 0) {
-                          return whiteColor;
-                        }
-                        return kColapsColor;
-                      },
+                      scrollbar: const PlutoGridScrollbarConfig(
+                        scrollbarThickness: 5,
+                        scrollBarColor: kCardGreenColor,
+                        scrollbarThicknessWhileDragging: 5,
+                      ),
                     ),
-                  );
-                } else if (state is ProductError) {
-                  return Center(child: Text(state.message));
-                }
+                    rowColorCallback: (rowColorContext) {
+                      if (rowColorContext.rowIdx % 2 == 0) {
+                        return whiteColor;
+                      }
+                      return kColapsColor;
+                    },
+                  ),
+                );
+              } else if (state is ProductError) {
+                return Center(child: Text(state.message));
+              }
 
-                return const Center(child: Text('No products available.'));
-              },
-            ),
+              return const Center(child: Text('No products available.'));
+            },
           ),
+
           const SizedBox(height: 16),
           CustomDateRangePicker(),
           const SizedBox(height: 16),

@@ -1,5 +1,7 @@
 // ignore_for_file: unnecessary_const
 
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_barcode_listener/flutter_barcode_listener.dart';
@@ -50,13 +52,30 @@ class HeaderComponent extends StatelessWidget {
                         width: buttonWidth,
                         child: CustomTextIconButton(
                           onPressed: () {
-                            productCubit.addProduct();
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Product added successfully!'),
-                                duration: Duration(seconds: 2),
-                              ),
-                            );
+                            log('message 1');
+                            bool isBarcodeValid = productCubit.isValidBarcode(
+                                productCubit.barcodeController.text);
+                            double? quantity = double.tryParse(productCubit
+                                .defaultQuantityController.text
+                                .trim());
+
+// Check if barcode is valid and quantity is a valid non-zero number
+                            if (isBarcodeValid &&
+                                (quantity != null && quantity > 0)) {
+                              log('message 2');
+                              productCubit.addProduct();
+                            } else {
+                              log('message 3');
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content:
+                                      Text('Invalid barcode or quantity is 0'),
+                                  duration: Duration(
+                                      seconds:
+                                          2), // How long the Snackbar will be visible
+                                ),
+                              );
+                            }
                           },
                           title: 'إضافة',
                           icon: Icons.add,
