@@ -307,6 +307,7 @@ class ProductCubit extends Cubit<ProductState> {
                             }
                             rendererContext.stateManager.notifyListeners();
                           }
+                          //key = UniqueKey();
                         },
                         child: Padding(
                           padding: const EdgeInsets.all(1.0),
@@ -356,6 +357,7 @@ class ProductCubit extends Cubit<ProductState> {
                             // Notify PlutoGrid to refresh the specific cell
                             rendererContext.stateManager.notifyListeners();
                           }
+                           //key = UniqueKey();
                         },
                         child: Padding(
                           padding: const EdgeInsets.all(1.0),
