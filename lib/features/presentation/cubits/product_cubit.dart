@@ -283,6 +283,7 @@ class ProductCubit extends Cubit<ProductState> {
                     children: [
                       InkWell(
                         onTap: () async {
+                          emit(ProductLoading());
                           if (quantityCell != null) {
                             int currentQuantity = quantityCell.value ?? 0;
                             final barcodeValue = rendererContext
@@ -331,6 +332,7 @@ class ProductCubit extends Cubit<ProductState> {
                       ),
                       InkWell(
                         onTap: () async {
+                          emit(ProductLoading());
                           if (quantityCell != null) {
                             int currentQuantity = quantityCell.value ?? 0;
                             final barcodeValue = rendererContext
