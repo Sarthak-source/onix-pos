@@ -20,13 +20,7 @@ class HeaderComponent extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<ProductCubit, ProductState>(
       builder: (context, state) {
-        if (state is ProductLoading) {
-          return Container(
-            color: barCodeColor,
-            width: MediaQuery.of(context).size.width,
-            child: const Center(child: CircularProgressIndicator()),
-          );
-        }
+        
 
         final productCubit = context.read<ProductCubit>();
 
@@ -59,8 +53,6 @@ class HeaderComponent extends StatelessWidget {
                             double? quantity = double.tryParse(productCubit
                                 .defaultQuantityController.text
                                 .trim());
-
-// Check if barcode is valid and quantity is a valid non-zero number
                             if (isBarcodeValid &&
                                 (quantity != null && quantity > 0)) {
                               log('message 2');

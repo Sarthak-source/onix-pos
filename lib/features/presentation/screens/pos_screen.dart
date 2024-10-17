@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:onix_pos/core/common_widgets/custom_text_icon_button.dart';
@@ -44,21 +42,33 @@ class ProductOrderView extends StatelessWidget {
             builder: (context, state) {
               final productCubit = context.read<ProductCubit>();
               if (state is ProductLoading) {
-                return PlutoGrid(
-                  columns: context.read<ProductCubit>().column(),
-                  rows: context
-                      .read<ProductCubit>()
-                      .plutoRow(), // Call to refresh rows
-                  // ...
-                );
+                return const CircularProgressIndicator.adaptive();
               } else if (state is ProductLoaded) {
                 return SizedBox(
                   height: rowHeight *
-                      context.read<ProductCubit>().column().length *
+                      context.read<ProductCubit>().plutoColumn().length *
                       1,
                   child: PlutoGrid(
                     key: productCubit.key,
-                    columns: context.read<ProductCubit>().column(),
+                    onSelected: (event) {
+                      // Ensure the selected cell exists and the field is 'quantity'
+                      if (event.cell != null &&
+                          event.cell!.column.field == 'quantity') {
+                        // Get the current quantity value and barcode number
+                        final currentQuantity = event.cell!.value;
+                        final barcodeValue =
+                            event.row!.cells['barcodeNumber']!.value;
+
+                        // Define a new quantity (you could use a dialog or an increment here)
+                        final newQuantity =
+                            currentQuantity + 1; // Example: increment by 1
+
+                        // Call the cubit method to update the product quantity
+                        productCubit.updateProductQuantity(
+                            barcodeValue, newQuantity);
+                      }
+                    },
+                    columns: context.read<ProductCubit>().plutoColumn(),
                     rows: context.read<ProductCubit>().plutoRow(),
                     configuration: PlutoGridConfiguration(
                       enableMoveDownAfterSelecting: true,

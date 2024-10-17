@@ -168,7 +168,8 @@ class ProductCubit extends Cubit<ProductState> {
     return returnList;
   }
 
-  void updateProductQuantity(String barcode, double newQuantity) async {
+  Future<void> updateProductQuantity(String barcode, double newQuantity) async {
+    emit(ProductLoading());
     try {
       final productIndex = productList.indexWhere(
         (product) => product.barcodeNumber.toString() == barcode,
@@ -194,7 +195,8 @@ class ProductCubit extends Cubit<ProductState> {
               .add(productList[productIndex].copyWith(quantity: newQuantity));
         }
 
-        emit(ProductLoaded(productListDisplay));
+        emit(ProductLoaded(productListDisplay)); // Emit loaded state here
+        //key = UniqueKey();
       } else {
         emit(ProductError('Product not found for the provided barcode.'));
       }
@@ -202,7 +204,6 @@ class ProductCubit extends Cubit<ProductState> {
       emit(ProductError(
           'An error occurred while updating the product: ${e.toString()}'));
     }
-    //emit(ProductLoaded(productListDisplay));
   }
 
   // Method to return PlutoRow list
@@ -212,7 +213,9 @@ class ProductCubit extends Cubit<ProductState> {
           (product) => PlutoRow(cells: {
             'name': PlutoCell(value: product.name),
             'unit': PlutoCell(value: 'pcs'),
-            'quantity': PlutoCell(value: product.quantity),
+            'quantity': PlutoCell(
+                value: product.quantity,
+                key: Key('${product.barcodeNumber}_quantity')),
             'price': PlutoCell(value: product.price),
             'delete': PlutoCell(value: 'delete'),
             'barcodeNumber': PlutoCell(value: product.barcodeNumber.toString()),
@@ -222,7 +225,7 @@ class ProductCubit extends Cubit<ProductState> {
   }
 
   // Define PlutoColumn List
-  List<PlutoColumn> column(onTap) {
+  List<PlutoColumn> plutoColumn() {
     return [
       PlutoColumn(
         title: 'Name',
@@ -250,7 +253,7 @@ class ProductCubit extends Cubit<ProductState> {
         title: 'Quantity',
         field: 'quantity',
         width: PlutoGridSettings.minColumnWidth * 3,
-        type: PlutoColumnType.text(),
+        type: PlutoColumnType.number(),
         textAlign: PlutoColumnTextAlign.center,
         suppressedAutoSize: true,
         enableDropToResize: false,
@@ -279,8 +282,7 @@ class ProductCubit extends Cubit<ProductState> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       InkWell(
-                        onTap: () {
-                          //key= UniqueKey();
+                        onTap: () async {
                           if (quantityCell != null) {
                             int currentQuantity = quantityCell.value ?? 0;
                             final barcodeValue = rendererContext
@@ -290,10 +292,18 @@ class ProductCubit extends Cubit<ProductState> {
                             rendererContext.stateManager.changeCellValue(
                               quantityCell,
                               currentQuantity > 1 ? (currentQuantity - 1) : 0,
-                              force: true, // Force update
+                              force: true,
                             );
-                            updateProductQuantity(
-                                barcodeValue, currentQuantity + 1);
+
+                            try {
+                              await updateProductQuantity(
+                                  barcodeValue, currentQuantity - 1);
+                              emit(ProductLoaded(
+                                  productListDisplay)); // Emit loaded state on success
+                            } catch (error) {
+                              emit(ProductError(error
+                                  .toString())); // Emit error state on failure
+                            }
                             rendererContext.stateManager.notifyListeners();
                           }
                         },
@@ -307,7 +317,7 @@ class ProductCubit extends Cubit<ProductState> {
                             child: const Icon(
                               Icons.remove,
                               color: Colors.grey,
-                              size: 35,
+                              size: 30,
                             ),
                           ),
                         ),
@@ -320,25 +330,29 @@ class ProductCubit extends Cubit<ProductState> {
                         ),
                       ),
                       InkWell(
-                        onTap: () {
+                        onTap: () async {
                           if (quantityCell != null) {
                             int currentQuantity = quantityCell.value ?? 0;
-
                             final barcodeValue = rendererContext
                                 .row.cells['barcodeNumber']!.value;
                             // Update the cell's value
                             rendererContext.stateManager.changeCellValue(
                               quantityCell,
                               currentQuantity + 1,
-                              force: true, // Force update
+                              force: true,
                             );
-                            // Notify PlutoGrid that the data has changed
-                            rendererContext.stateManager.notifyListeners();
 
-                            updateProductQuantity(
-                                barcodeValue,
-                                currentQuantity +
-                                    1); // Update with the new quantity
+                            try {
+                              await updateProductQuantity(
+                                  barcodeValue, currentQuantity + 1);
+                              emit(ProductLoaded(
+                                  productListDisplay)); // Emit loaded state on success
+                            } catch (error) {
+                              emit(ProductError(error
+                                  .toString())); // Emit error state on failure
+                            }
+                            // Notify PlutoGrid to refresh the specific cell
+                            rendererContext.stateManager.notifyListeners();
                           }
                         },
                         child: Padding(
@@ -350,8 +364,8 @@ class ProductCubit extends Cubit<ProductState> {
                             ),
                             child: const Icon(
                               Icons.add,
-                              color: Colors.blue,
-                              size: 35,
+                              color: kSkyDarkColor,
+                              size: 30,
                             ),
                           ),
                         ),
@@ -397,16 +411,9 @@ class ProductCubit extends Cubit<ProductState> {
     ];
   }
 
-  // Fetch products
   void fetchProducts() {
     emit(ProductLoaded(returnList()));
   }
-
-  // Simulate adding a product by barcode
-
-  // Adjust product quantity
-
-  // Delete a product
 
   Future<pw.Font> loadFont(String path) async {
     final fontData = await rootBundle.load(path);
