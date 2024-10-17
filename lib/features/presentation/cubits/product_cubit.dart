@@ -222,7 +222,7 @@ class ProductCubit extends Cubit<ProductState> {
   }
 
   // Define PlutoColumn List
-  List<PlutoColumn> column() {
+  List<PlutoColumn> column(onTap) {
     return [
       PlutoColumn(
         title: 'Name',
@@ -397,10 +397,16 @@ class ProductCubit extends Cubit<ProductState> {
     ];
   }
 
-  
+  // Fetch products
   void fetchProducts() {
     emit(ProductLoaded(returnList()));
   }
+
+  // Simulate adding a product by barcode
+
+  // Adjust product quantity
+
+  // Delete a product
 
   Future<pw.Font> loadFont(String path) async {
     final fontData = await rootBundle.load(path);
