@@ -12,25 +12,7 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:pluto_grid/pluto_grid.dart';
 
 import '../../data/models/product_model.dart';
-
-// Define Product States
-abstract class ProductState {}
-
-class ProductInitial extends ProductState {}
-
-class ProductLoading extends ProductState {}
-
-class ProductLoaded extends ProductState {
-  final List<ProductModel> products;
-
-  ProductLoaded(this.products);
-}
-
-class ProductError extends ProductState {
-  final String message;
-
-  ProductError(this.message);
-}
+import 'product_state.dart';
 
 // Define Product Cubit
 class ProductCubit extends Cubit<ProductState> {
@@ -120,7 +102,6 @@ class ProductCubit extends Cubit<ProductState> {
       emit(ProductLoaded(productListDisplay));
       key = UniqueKey();
     } catch (e) {
-      
       // Handle the error if no product matches the barcode
       emit(ProductError(e.toString()));
     }
@@ -187,63 +168,41 @@ class ProductCubit extends Cubit<ProductState> {
     return returnList;
   }
 
-  void updateQuantity(String barcode, bool increment) {
-    final productIndex = productListDisplay.indexWhere(
-      (product) => product.barcodeNumber.toString() == barcode,
-    );
-
-    if (productIndex >= 0) {
-      final currentProduct = productListDisplay[productIndex];
-      double newQuantity = increment
-          ? currentProduct.quantity + 1 // Increment quantity
-          : (currentProduct.quantity > 0
-              ? currentProduct.quantity - 1
-              : 0); // Decrement quantity
-
-      productListDisplay[productIndex] =
-          currentProduct.copyWith(quantity: newQuantity);
-      emit(ProductLoaded(productListDisplay));
-    }
-  }
-
-  // Example usage in button's onTap
-  void onIncrementButtonPressed(String barcode) {
-    updateQuantity(barcode, true); // Increment
-  }
-
-  void onDecrementButtonPressed(String barcode) {
-    updateQuantity(barcode, false); // Decrement
-  }
-
-  void updateProductQuantity(String barcode, double newQuantity) {
-    final productIndex = productList.indexWhere(
-      (product) => product.barcodeNumber.toString() == barcode,
-    );
-
-    if (productIndex >= 0) {
-      // Update the quantity of the product in the main productList
-      productList[productIndex] =
-          productList[productIndex].copyWith(quantity: newQuantity);
-
-      // Check if the product already exists in productListDisplay
-      final existingIndex = productListDisplay.indexWhere(
-        (p) => p.barcodeNumber == productList[productIndex].barcodeNumber,
+  void updateProductQuantity(String barcode, double newQuantity) async {
+    try {
+      final productIndex = productList.indexWhere(
+        (product) => product.barcodeNumber.toString() == barcode,
       );
 
-      if (existingIndex >= 0) {
-        // If product exists in productListDisplay, update its quantity
-        productListDisplay[existingIndex] =
+      if (productIndex >= 0) {
+        // Update the quantity of the product in the main productList
+        productList[productIndex] =
             productList[productIndex].copyWith(quantity: newQuantity);
-      } else {
-        // If product does not exist, add it to productListDisplay
-        productListDisplay
-            .add(productList[productIndex].copyWith(quantity: newQuantity));
-      }
 
-      emit(ProductLoaded(productListDisplay));
-    } else {
-      emit(ProductError('Product not found for the provided barcode.'));
+        // Check if the product already exists in productListDisplay
+        final existingIndex = productListDisplay.indexWhere(
+          (p) => p.barcodeNumber == productList[productIndex].barcodeNumber,
+        );
+
+        if (existingIndex >= 0) {
+          // If product exists in productListDisplay, update its quantity
+          productListDisplay[existingIndex] =
+              productList[productIndex].copyWith(quantity: newQuantity);
+        } else {
+          // If product does not exist, add it to productListDisplay
+          productListDisplay
+              .add(productList[productIndex].copyWith(quantity: newQuantity));
+        }
+
+        emit(ProductLoaded(productListDisplay));
+      } else {
+        emit(ProductError('Product not found for the provided barcode.'));
+      }
+    } catch (e) {
+      emit(ProductError(
+          'An error occurred while updating the product: ${e.toString()}'));
     }
+    //emit(ProductLoaded(productListDisplay));
   }
 
   // Method to return PlutoRow list
@@ -256,7 +215,7 @@ class ProductCubit extends Cubit<ProductState> {
             'quantity': PlutoCell(value: product.quantity),
             'price': PlutoCell(value: product.price),
             'delete': PlutoCell(value: 'delete'),
-            'product': PlutoCell(value: product), // Store the product object
+            'barcodeNumber': PlutoCell(value: product.barcodeNumber.toString()),
           }, key: Key(product.barcodeNumber.toString())),
         )
         .toList();
@@ -324,6 +283,8 @@ class ProductCubit extends Cubit<ProductState> {
                           //key= UniqueKey();
                           if (quantityCell != null) {
                             int currentQuantity = quantityCell.value ?? 0;
+                            final barcodeValue = rendererContext
+                                .row.cells['barcodeNumber']!.value;
 
                             // Update the cell's value
                             rendererContext.stateManager.changeCellValue(
@@ -331,11 +292,10 @@ class ProductCubit extends Cubit<ProductState> {
                               currentQuantity > 1 ? (currentQuantity - 1) : 0,
                               force: true, // Force update
                             );
-
-                            // Notify PlutoGrid that the data has changed
+                            updateProductQuantity(
+                                barcodeValue, currentQuantity + 1);
                             rendererContext.stateManager.notifyListeners();
                           }
-                          //rendererContext.stateManager.setCurrentCell(cell, rowIdx)
                         },
                         child: Padding(
                           padding: const EdgeInsets.all(1.0),
@@ -364,14 +324,8 @@ class ProductCubit extends Cubit<ProductState> {
                           if (quantityCell != null) {
                             int currentQuantity = quantityCell.value ?? 0;
 
-                            final barcode = rendererContext
-                                .stateManager
-                                .currentRow
-                                ?.cells['product']
-                                ?.value
-                                ?.barcodeNumber
-                                .toString();
-
+                            final barcodeValue = rendererContext
+                                .row.cells['barcodeNumber']!.value;
                             // Update the cell's value
                             rendererContext.stateManager.changeCellValue(
                               quantityCell,
@@ -382,7 +336,7 @@ class ProductCubit extends Cubit<ProductState> {
                             rendererContext.stateManager.notifyListeners();
 
                             updateProductQuantity(
-                                barcode ?? '',
+                                barcodeValue,
                                 currentQuantity +
                                     1); // Update with the new quantity
                           }
@@ -436,7 +390,6 @@ class ProductCubit extends Cubit<ProductState> {
             icon: const Icon(Icons.delete, color: Colors.red),
             onPressed: () {
               rendererContext.stateManager.removeRows([rendererContext.row]);
-              
             },
           );
         },
@@ -444,33 +397,10 @@ class ProductCubit extends Cubit<ProductState> {
     ];
   }
 
-  // Fetch products
+  
   void fetchProducts() {
-    emit(ProductLoaded(productList));
+    emit(ProductLoaded(returnList()));
   }
-
-  // Simulate adding a product by barcode
-  void addProductByBarcode(String barcode) {
-    productList.add(ProductModel(
-        name: "Scanned Product",
-        price: 399.00,
-        barcodeNumber: 20,
-        quantity: 1));
-    emit(ProductLoaded(productList));
-  }
-
-  // Adjust product quantity
-  void adjustQuantity(ProductModel product, int amount) {
-    final index = productList.indexOf(product);
-    final newQuantity = productList[index].quantity + amount;
-
-    if (newQuantity > 0) {
-      productList[index] = productList[index].copyWith(quantity: newQuantity);
-      emit(ProductLoaded(productList));
-    }
-  }
-
-  // Delete a product
 
   Future<pw.Font> loadFont(String path) async {
     final fontData = await rootBundle.load(path);

@@ -9,6 +9,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:onix_pos/core/common_widgets/custom_textfiled_purchase.dart';
 import 'package:onix_pos/core/style/app_colors.dart';
 import 'package:onix_pos/features/presentation/cubits/product_cubit.dart';
+import 'package:onix_pos/features/presentation/cubits/product_state.dart';
 
 import '../../../core/common_widgets/custom_text_icon_button.dart';
 

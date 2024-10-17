@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:onix_pos/core/common_widgets/custom_text_icon_button.dart';
@@ -7,6 +9,7 @@ import 'package:pluto_grid/pluto_grid.dart';
 
 import '../../../core/style/app_colors.dart';
 import '../../../core/style/app_text_styles.dart';
+import '../cubits/product_state.dart';
 import '../widgets/product_header.dart';
 
 class ProductOrderScreen extends StatelessWidget {
@@ -30,13 +33,11 @@ class ProductOrderView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const double rowHeight = 40;
-
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Column(
         children: [
           const HeaderComponent(),
-
           const SizedBox(height: 16),
           // Product List Table
           BlocBuilder<ProductCubit, ProductState>(
