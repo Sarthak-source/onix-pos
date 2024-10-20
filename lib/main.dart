@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import 'features/presentation/screens/pos_screen.dart';
 
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
 void main() {
   runApp(const MyApp());
 }
@@ -11,10 +13,10 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return  const MaterialApp(
-    
+    return MaterialApp(
+      navigatorKey: navigatorKey,
       title: 'Product Order',
-      home: ProductOrderScreen(),
+      home: const ProductOrderScreen(),
     );
   }
 }

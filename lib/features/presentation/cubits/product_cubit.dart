@@ -7,6 +7,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:http/http.dart' as http;
 import 'package:onix_pos/core/style/app_colors.dart';
 import 'package:onix_pos/features/presentation/widgets/pdf_view.dart';
+import 'package:onix_pos/main.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:pluto_grid/pluto_grid.dart';
@@ -400,13 +401,48 @@ class ProductCubit extends Cubit<ProductState> {
             onPressed: () {
               final barcodeValue =
                   rendererContext.row.cells['barcodeNumber']!.value;
-              const currentValue = 0.0;
-              rendererContext.stateManager.removeRows([rendererContext.row]);
-              updateProductQuantity(barcodeValue, currentValue);
+              final nameValue = rendererContext.row.cells['name']!.value;
+
+              showDialog(
+                context: navigatorKey.currentState!.context,
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    title: const Text("Delete Product"),
+                    content: Text(
+                        "Are you sure you want to delete product '$nameValue'?"),
+                    actions: <Widget>[
+                      TextButton(
+                        child: const Text("Cancel"),
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                      ),
+                      TextButton(
+                        child: const Text("Delete"),
+                        onPressed: () {
+                          const currentValue = 0.0;
+                          rendererContext.stateManager
+                              .removeRows([rendererContext.row]);
+                          updateProductQuantity(barcodeValue, currentValue);
+
+                          Navigator.of(context).pop(); // Close the dialog
+
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                  "Product '$barcodeValue' has been deleted successfully."),
+                            ),
+                          );
+                        },
+                      ),
+                    ],
+                  );
+                },
+              );
             },
           );
         },
-      ),
+      )
     ];
   }
 

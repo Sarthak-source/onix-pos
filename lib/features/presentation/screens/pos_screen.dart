@@ -109,7 +109,12 @@ class _ProductOrderViewState extends State<ProductOrderView> {
           // Print Button
           CustomTextIconButton(
             onPressed: () {
-              if (context.read<ProductCubit>().returnList().isEmpty) {
+              bool hasValidProducts = context
+                  .read<ProductCubit>()
+                  .returnList()
+                  .any((product) => product.quantity > 0);
+
+              if (hasValidProducts) {
                 context.read<ProductCubit>().generateInvoice(context);
               } else {
                 ScaffoldMessenger.of(context).showSnackBar(
