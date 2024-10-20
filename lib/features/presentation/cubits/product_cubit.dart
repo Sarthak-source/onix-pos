@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:http/http.dart' as http;
+import 'package:onix_pos/core/extentions/size_ext.dart';
 import 'package:onix_pos/core/style/app_colors.dart';
 import 'package:onix_pos/features/presentation/widgets/pdf_view.dart';
 import 'package:onix_pos/main.dart';
@@ -238,7 +239,7 @@ class ProductCubit extends Cubit<ProductState> {
         title: 'Name',
         field: 'name',
         type: PlutoColumnType.text(),
-        width: PlutoGridSettings.minColumnWidth * 3,
+        width: navigatorKey.currentContext!.width * 0.2,
         textAlign: PlutoColumnTextAlign.center,
         suppressedAutoSize: true,
         enableDropToResize: false,
@@ -249,7 +250,7 @@ class ProductCubit extends Cubit<ProductState> {
         title: 'Unit',
         field: 'unit',
         type: PlutoColumnType.text(),
-        width: PlutoGridSettings.minColumnWidth * 3,
+        width: navigatorKey.currentContext!.width * 0.2,
         textAlign: PlutoColumnTextAlign.center,
         suppressedAutoSize: true,
         enableDropToResize: false,
@@ -259,7 +260,8 @@ class ProductCubit extends Cubit<ProductState> {
       PlutoColumn(
         title: 'Quantity',
         field: 'quantity',
-        width: PlutoGridSettings.minColumnWidth * 3,
+        width: navigatorKey.currentContext!.width * 0.2,
+
         type: PlutoColumnType.number(),
         textAlign: PlutoColumnTextAlign.center,
         suppressedAutoSize: true,
@@ -318,6 +320,52 @@ class ProductCubit extends Cubit<ProductState> {
                                     barcodeValue, currentValue - 1);
 
                                 //emit(ProductDeIncrement());
+                              } else {
+                                showDialog(
+                                  context: navigatorKey.currentState!.context,
+                                  builder: (BuildContext context) {
+                                    final barcodeValue = rendererContext
+                                        .row.cells['barcodeNumber']!.value;
+                                    final nameValue = rendererContext
+                                        .row.cells['name']!.value;
+
+                                    return AlertDialog(
+                                      title: const Text("Delete Product"),
+                                      content: Text(
+                                          "Are you sure you want to delete product '$nameValue'?"),
+                                      actions: <Widget>[
+                                        TextButton(
+                                          child: const Text("Cancel"),
+                                          onPressed: () {
+                                            Navigator.of(context).pop();
+                                          },
+                                        ),
+                                        TextButton(
+                                          child: const Text("Delete"),
+                                          onPressed: () {
+                                            const currentValue = 0.0;
+                                            rendererContext.stateManager
+                                                .removeRows(
+                                                    [rendererContext.row]);
+                                            updateProductQuantity(
+                                                barcodeValue, currentValue);
+
+                                            Navigator.of(context)
+                                                .pop(); // Close the dialog
+
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(
+                                              SnackBar(
+                                                content: Text(
+                                                    "Product '$barcodeValue' has been deleted successfully."),
+                                              ),
+                                            );
+                                          },
+                                        ),
+                                      ],
+                                    );
+                                  },
+                                );
                               }
                             },
                           ),
@@ -377,7 +425,7 @@ class ProductCubit extends Cubit<ProductState> {
       PlutoColumn(
         title: 'Price',
         field: 'price',
-        width: PlutoGridSettings.minColumnWidth * 3,
+        width: navigatorKey.currentContext!.width * 0.2,
         type: PlutoColumnType.text(),
         textAlign: PlutoColumnTextAlign.center,
         suppressedAutoSize: true,
@@ -388,7 +436,7 @@ class ProductCubit extends Cubit<ProductState> {
       PlutoColumn(
         title: 'Delete',
         field: 'delete',
-        width: PlutoGridSettings.minColumnWidth * 3,
+        width: navigatorKey.currentContext!.width * 0.2,
         type: PlutoColumnType.text(),
         textAlign: PlutoColumnTextAlign.center,
         suppressedAutoSize: true,

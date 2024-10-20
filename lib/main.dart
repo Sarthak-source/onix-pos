@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:onix_pos/core/shared_cubits/bloc_provider_list.dart';
 
 import 'features/presentation/screens/pos_screen.dart';
 
@@ -13,10 +15,13 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      navigatorKey: navigatorKey,
-      title: 'Product Order',
-      home: const ProductOrderScreen(),
+    return MultiBlocProvider(
+      providers: BlocProviderList.getProviders(context),
+      child: MaterialApp(
+        navigatorKey: navigatorKey,
+        title: 'Product Order',
+        home: const ProductOrderScreen(),
+      ),
     );
   }
 }
