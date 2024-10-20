@@ -51,7 +51,7 @@ class ProductCubit extends Cubit<ProductState> {
   bool isValidBarcode(String barcode) {
     // Example validation: check if the barcode is not empty and has 13 digits
     return barcode.isNotEmpty &&
-       (barcode.length >= 9 && barcode.length <= 15) &&
+        (barcode.length >= 9 && barcode.length <= 15) &&
         RegExp(r'^[0-9]+$').hasMatch(barcode);
   }
 
@@ -103,7 +103,7 @@ class ProductCubit extends Cubit<ProductState> {
       }
 
       emit(ProductLoaded(productListDisplay));
-      
+
       //stateManagerProviders.notifyListeners();
       key = UniqueKey();
     } catch (e) {
@@ -270,21 +270,20 @@ class ProductCubit extends Cubit<ProductState> {
 
         backgroundColor: kSkyDarkColor,
         renderer: (rendererContext) {
-          
-
           return Center(
             child: Padding(
               padding: const EdgeInsets.all(0.0),
-              child:  Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 1.0,vertical: 1),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(20.0),
-                    color: Colors.grey[200],
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Container(
+              child: Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 1.0, vertical: 1),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20.0),
+                  color: Colors.grey[200],
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
                       width: 23,
                       height: 23,
                       decoration: const BoxDecoration(
@@ -324,14 +323,14 @@ class ProductCubit extends Cubit<ProductState> {
                         ),
                       ),
                     ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                        child: Text(
-                          rendererContext.cell.value.toString(),
-                          style: const TextStyle(fontSize: 16.0),
-                        ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                      child: Text(
+                        rendererContext.cell.value.toString(),
+                        style: const TextStyle(fontSize: 16.0),
                       ),
-                      Container(
+                    ),
+                    Container(
                       width: 23,
                       height: 23,
                       decoration: const BoxDecoration(
@@ -353,8 +352,8 @@ class ProductCubit extends Cubit<ProductState> {
                               final barcodeValue = rendererContext
                                   .row.cells['barcodeNumber']!.value;
 
-                              final currentValue = rendererContext
-                                  .row.cells['quantity']!.value;
+                              final currentValue =
+                                  rendererContext.row.cells['quantity']!.value;
                               rendererContext.row.cells['quantity']!.value =
                                   currentValue + 1;
 
@@ -367,11 +366,10 @@ class ProductCubit extends Cubit<ProductState> {
                         ),
                       ),
                     )
-                    ],
-                  ),
+                  ],
                 ),
               ),
-            
+            ),
           );
         },
       ),
@@ -400,7 +398,11 @@ class ProductCubit extends Cubit<ProductState> {
           return IconButton(
             icon: const Icon(Icons.delete, color: Colors.red),
             onPressed: () {
+              final barcodeValue =
+                  rendererContext.row.cells['barcodeNumber']!.value;
+              const currentValue = 0.0;
               rendererContext.stateManager.removeRows([rendererContext.row]);
+              updateProductQuantity(barcodeValue, currentValue);
             },
           );
         },

@@ -56,14 +56,14 @@ class _ProductOrderViewState extends State<ProductOrderView> {
                   child: PlutoGrid(
                     key: productCubit.key,
                     onLoaded: (event) {
-                      productCubit.stateManagerProviders =event.stateManager;
-                      productCubit.stateManagerProviders.setSelectingMode(PlutoGridSelectingMode.row);
+                      productCubit.stateManagerProviders = event.stateManager;
+                      productCubit.stateManagerProviders
+                          .setSelectingMode(PlutoGridSelectingMode.row);
                     },
                     columns: context.read<ProductCubit>().plutoColumn(),
                     rows: context.read<ProductCubit>().plutoRow(),
                     configuration: PlutoGridConfiguration(
                       enableMoveDownAfterSelecting: true,
-                      
                       style: PlutoGridStyleConfig(
                         rowHeight: rowHeight,
                         gridBorderRadius: BorderRadius.circular(4),
@@ -109,7 +109,16 @@ class _ProductOrderViewState extends State<ProductOrderView> {
           // Print Button
           CustomTextIconButton(
             onPressed: () {
-              context.read<ProductCubit>().generateInvoice(context);
+              if (context.read<ProductCubit>().returnList().isEmpty) {
+                context.read<ProductCubit>().generateInvoice(context);
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('No product exists'),
+                    duration: Duration(seconds: 2),
+                  ),
+                );
+              }
             },
             title: "Print",
             iconColor: Colors.white,

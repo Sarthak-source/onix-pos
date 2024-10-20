@@ -20,8 +20,6 @@ class HeaderComponent extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<ProductCubit, ProductState>(
       builder: (context, state) {
-        
-
         final productCubit = context.read<ProductCubit>();
 
         return BarcodeKeyboardListener(
@@ -53,21 +51,27 @@ class HeaderComponent extends StatelessWidget {
                             double? quantity = double.tryParse(productCubit
                                 .defaultQuantityController.text
                                 .trim());
-                            if (isBarcodeValid &&
-                                (quantity != null && quantity > 0)) {
-                              log('message 2');
-                              productCubit.addProduct();
-                            } else {
-                              log('message 3');
+
+                            if (!isBarcodeValid) {
+                              log('Invalid barcode');
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Invalid barcode'),
+                                  duration: Duration(seconds: 2),
+                                ),
+                              );
+                            } else if (quantity == null || quantity <= 0) {
+                              log('Invalid quantity');
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
                                   content:
-                                      Text('Invalid barcode or quantity is 0'),
-                                  duration: Duration(
-                                      seconds:
-                                          2), // How long the Snackbar will be visible
+                                      Text('Quantity must be greater than 0'),
+                                  duration: Duration(seconds: 2),
                                 ),
                               );
+                            } else {
+                              log('message 2');
+                              productCubit.addProduct();
                             }
                           },
                           title: 'إضافة',
