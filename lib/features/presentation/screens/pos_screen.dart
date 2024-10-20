@@ -114,7 +114,7 @@ class _ProductOrderViewState extends State<ProductOrderView> {
               } else {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
-                    content: Text('No product exists'),
+                    content: Text('No products available.'),
                     duration: Duration(seconds: 2),
                   ),
                 );
