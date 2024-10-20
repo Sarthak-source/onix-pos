@@ -25,9 +25,14 @@ class ProductOrderScreen extends StatelessWidget {
   }
 }
 
-class ProductOrderView extends StatelessWidget {
+class ProductOrderView extends StatefulWidget {
   const ProductOrderView({super.key});
 
+  @override
+  State<ProductOrderView> createState() => _ProductOrderViewState();
+}
+
+class _ProductOrderViewState extends State<ProductOrderView> {
   @override
   Widget build(BuildContext context) {
     const double rowHeight = 40;
@@ -50,28 +55,15 @@ class ProductOrderView extends StatelessWidget {
                       1,
                   child: PlutoGrid(
                     key: productCubit.key,
-                    onSelected: (event) {
-                      // Ensure the selected cell exists and the field is 'quantity'
-                      if (event.cell != null &&
-                          event.cell!.column.field == 'quantity') {
-                        // Get the current quantity value and barcode number
-                        final currentQuantity = event.cell!.value;
-                        final barcodeValue =
-                            event.row!.cells['barcodeNumber']!.value;
-
-                        // Define a new quantity (you could use a dialog or an increment here)
-                        final newQuantity =
-                            currentQuantity + 1; // Example: increment by 1
-
-                        // Call the cubit method to update the product quantity
-                        productCubit.updateProductQuantity(
-                            barcodeValue, newQuantity);
-                      }
+                    onLoaded: (event) {
+                      productCubit.stateManagerProviders =event.stateManager;
+                      productCubit.stateManagerProviders.setSelectingMode(PlutoGridSelectingMode.row);
                     },
                     columns: context.read<ProductCubit>().plutoColumn(),
                     rows: context.read<ProductCubit>().plutoRow(),
                     configuration: PlutoGridConfiguration(
                       enableMoveDownAfterSelecting: true,
+                      
                       style: PlutoGridStyleConfig(
                         rowHeight: rowHeight,
                         gridBorderRadius: BorderRadius.circular(4),

@@ -16,7 +16,12 @@ import 'product_state.dart';
 
 // Define Product Cubit
 class ProductCubit extends Cubit<ProductState> {
-  ProductCubit() : super(ProductInitial());
+  ProductCubit() : super(ProductInitial()) {
+    productListDisplay = [];
+    //key = ValueKey(productListDisplay.hashCode);
+  }
+
+  late List<ProductModel> productListDisplay;
 
   late PlutoGridStateManager stateManagerProviders;
 
@@ -24,8 +29,6 @@ class ProductCubit extends Cubit<ProductState> {
 
   TextEditingController defaultQuantityController = TextEditingController();
   TextEditingController barcodeController = TextEditingController();
-
-  List<ProductModel> productListDisplay = [];
 
   List<ProductModel> productList = [
     ProductModel(
@@ -48,7 +51,7 @@ class ProductCubit extends Cubit<ProductState> {
   bool isValidBarcode(String barcode) {
     // Example validation: check if the barcode is not empty and has 13 digits
     return barcode.isNotEmpty &&
-        barcode.length == 13 &&
+       (barcode.length >= 9 && barcode.length <= 15) &&
         RegExp(r'^[0-9]+$').hasMatch(barcode);
   }
 
@@ -100,6 +103,8 @@ class ProductCubit extends Cubit<ProductState> {
       }
 
       emit(ProductLoaded(productListDisplay));
+      
+      //stateManagerProviders.notifyListeners();
       key = UniqueKey();
     } catch (e) {
       // Handle the error if no product matches the barcode
@@ -109,6 +114,7 @@ class ProductCubit extends Cubit<ProductState> {
     // Clear the controllers
     defaultQuantityController.clear();
     barcodeController.clear();
+    //stateManagerProviders.notifyListeners(true);
   }
 
   Future<void> fetchProductByBarcode(String barcode) async {
@@ -264,16 +270,13 @@ class ProductCubit extends Cubit<ProductState> {
 
         backgroundColor: kSkyDarkColor,
         renderer: (rendererContext) {
-          PlutoCell? quantityCell =
-              rendererContext.stateManager.currentRow?.cells['quantity'];
+          
 
           return Center(
             child: Padding(
               padding: const EdgeInsets.all(0.0),
-              child: Transform.scale(
-                scale: 0.8,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 1.0),
+              child:  Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 1.0,vertical: 1),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(20.0),
                     color: Colors.grey[200],
@@ -281,49 +284,46 @@ class ProductCubit extends Cubit<ProductState> {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      InkWell(
-                        onTap: () async {
-                          emit(ProductLoading());
-                          if (quantityCell != null) {
-                            int currentQuantity = quantityCell.value ?? 0;
-                            final barcodeValue = rendererContext
-                                .row.cells['barcodeNumber']!.value;
+                      Container(
+                      width: 23,
+                      height: 23,
+                      decoration: const BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.white,
+                      ),
+                      child: ClipOval(
+                        child: Material(
+                          color: Colors
+                              .transparent, // Make the background transparent
+                          child: IconButton(
+                            splashRadius:
+                                25, // Set this to match the container's dimensions
+                            icon: const Icon(Icons.remove),
+                            iconSize:
+                                16, // Adjust icon size to fit within the circle
+                            padding: EdgeInsets.zero, // Remove default padding
+                            constraints:
+                                const BoxConstraints(), // Remove default constraints
+                            onPressed: () {
+                              final barcodeValue = rendererContext
+                                  .row.cells['barcodeNumber']!.value;
 
-                            // Update the cell's value
-                            rendererContext.stateManager.changeCellValue(
-                              quantityCell,
-                              currentQuantity > 1 ? (currentQuantity - 1) : 0,
-                              force: true,
-                            );
+                              final currentValue = rendererContext
+                                  .row.cells['quantity']!.value as int;
+                              if (currentValue > 0) {
+                                rendererContext.row.cells['quantity']!.value =
+                                    currentValue - 1;
 
-                            try {
-                              await updateProductQuantity(
-                                  barcodeValue, currentQuantity - 1);
-                              emit(ProductLoaded(
-                                  productListDisplay)); // Emit loaded state on success
-                            } catch (error) {
-                              emit(ProductError(error
-                                  .toString())); // Emit error state on failure
-                            }
-                            rendererContext.stateManager.notifyListeners();
-                          }
-                          //key = UniqueKey();
-                        },
-                        child: Padding(
-                          padding: const EdgeInsets.all(1.0),
-                          child: Container(
-                            decoration: const BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: Colors.white,
-                            ),
-                            child: const Icon(
-                              Icons.remove,
-                              color: Colors.grey,
-                              size: 30,
-                            ),
+                                updateProductQuantity(
+                                    barcodeValue, currentValue - 1);
+
+                                //emit(ProductDeIncrement());
+                              }
+                            },
                           ),
                         ),
                       ),
+                    ),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 8.0),
                         child: Text(
@@ -331,54 +331,47 @@ class ProductCubit extends Cubit<ProductState> {
                           style: const TextStyle(fontSize: 16.0),
                         ),
                       ),
-                      InkWell(
-                        onTap: () async {
-                          emit(ProductLoading());
-                          if (quantityCell != null) {
-                            int currentQuantity = quantityCell.value ?? 0;
-                            final barcodeValue = rendererContext
-                                .row.cells['barcodeNumber']!.value;
-                            // Update the cell's value
-                            rendererContext.stateManager.changeCellValue(
-                              quantityCell,
-                              currentQuantity + 1,
-                              force: true,
-                            );
+                      Container(
+                      width: 23,
+                      height: 23,
+                      decoration: const BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.white,
+                      ),
+                      child: ClipOval(
+                        child: Material(
+                          color: Colors
+                              .transparent, // Make the background transparent to see the circle
+                          child: IconButton(
+                            splashRadius:
+                                25, // Set this to match the circle's dimensions
+                            icon: const Icon(Icons.add, color: kSkyDarkColor),
+                            iconSize: 16,
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints(),
+                            onPressed: () {
+                              final barcodeValue = rendererContext
+                                  .row.cells['barcodeNumber']!.value;
 
-                            try {
-                              await updateProductQuantity(
-                                  barcodeValue, currentQuantity + 1);
-                              emit(ProductLoaded(
-                                  productListDisplay)); // Emit loaded state on success
-                            } catch (error) {
-                              emit(ProductError(error
-                                  .toString())); // Emit error state on failure
-                            }
-                            // Notify PlutoGrid to refresh the specific cell
-                            rendererContext.stateManager.notifyListeners();
-                          }
-                           //key = UniqueKey();
-                        },
-                        child: Padding(
-                          padding: const EdgeInsets.all(1.0),
-                          child: Container(
-                            decoration: const BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: Colors.white,
-                            ),
-                            child: const Icon(
-                              Icons.add,
-                              color: kSkyDarkColor,
-                              size: 30,
-                            ),
+                              final currentValue = rendererContext
+                                  .row.cells['quantity']!.value;
+                              rendererContext.row.cells['quantity']!.value =
+                                  currentValue + 1;
+
+                              updateProductQuantity(
+                                  barcodeValue, currentValue + 1);
+
+                              //emit(ProductIncrement());
+                            },
                           ),
                         ),
                       ),
+                    )
                     ],
                   ),
                 ),
               ),
-            ),
+            
           );
         },
       ),
