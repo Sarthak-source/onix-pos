@@ -104,7 +104,8 @@ class ProductCubit extends Cubit<ProductState> {
         );
       }
 
-      emit(ProductLoaded(productListDisplay));
+      emit(ProductLoaded(
+          returnList().where((product) => product.quantity > 0).toList()));
 
       //stateManagerProviders.notifyListeners();
       key = UniqueKey();
@@ -171,8 +172,9 @@ class ProductCubit extends Cubit<ProductState> {
   }
 
   List<ProductModel> returnList() {
-    List<ProductModel> returnList =
-        productListDisplay.isEmpty ? productList : productListDisplay;
+    List<ProductModel> returnList = productListDisplay.isEmpty
+        ? productList
+        : productListDisplay.where((product) => product.quantity > 0).toList();
     return returnList;
   }
 
@@ -992,8 +994,11 @@ class ProductCubit extends Cubit<ProductState> {
               _invoiceDetails(regularFont),
               dottedDivider(),
               pw.SizedBox(height: 20),
-              _productTable(regularFont,
-                  returnList()), // Automatically splits table across pages
+              _productTable(
+                  regularFont,
+                  returnList()
+                      .where((product) => product.quantity > 0)
+                      .toList()), // Automatically splits table across pages
               pw.SizedBox(height: 10),
               _summary(regularFont),
               pw.SizedBox(height: 20),
