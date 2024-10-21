@@ -312,7 +312,7 @@ class ProductCubit extends Cubit<ProductState> {
 
                               final currentValue = rendererContext
                                   .row.cells['quantity']!.value as int;
-                              if (currentValue > 0) {
+                              if (currentValue > 1) {
                                 rendererContext.row.cells['quantity']!.value =
                                     currentValue - 1;
 
